@@ -108,4 +108,351 @@ SQL 注入
         <tag>面试八股文</tag>
       </tags>
   </entry>
+  <entry>
+    <title></title>
+    <url>/2025/07/22/%E9%9D%A2%E8%AF%95%E6%89%8B%E6%92%95%E5%A4%A7%E9%9B%86%E5%90%88/</url>
+    <content><![CDATA[所有遍历数组的方法
+forEach
+
+// 自定义 forEach 函数，添加到 Array 原型链Array.prototype.myForEach = function (callback, thisArg) &#123;    // 类型检查：确保 callback 是一个函数    if (typeof callback !== &#x27;function&#x27;) &#123;        throw new TypeError(&#x27;第一个参数必须是一个函数&#x27;);    &#125;    // 遍历数组，调用 callback 函数    for (let i = 0; i &lt; this.length; i++) &#123;        // 如果数组的当前元素是 undefined 或 null, 则跳过        if (i in this) &#123;//对于数组而言，in运算符用于检查是否有这个索引值            callback.call(thisArg, this[i], i, this);        &#125;    &#125;&#125;;
+
+
+map
+
+// 自定义 Map 函数，添加到 Array 原型链Array.prototype.myMap = function (callback) &#123;    // 类型检查：确保 callback 是一个函数    if (typeof callback !== &#x27;function&#x27;) &#123;        throw new TypeError(&#x27;第一个参数必须是一个函数&#x27;);    &#125;    let res = [];    // 遍历数组，调用 callback 函数    for (let i = 0; i &lt; this.length; i++) &#123;        // 如果数组的当前元素是 undefined 或 null, 则跳过        if (i in this) &#123;            res.push(callback(this[i], i, this));        &#125;    &#125;    return res&#125;;
+
+
+Filter
+
+Array.prototype.my_filter = function (cb) &#123;    let newArr = []    for (var i = 0; i &lt; this.length; i++) &#123;        if (cb(this[i], i, this)) &#123;            newArr.push(this[i])        &#125;    &#125;    return newArr&#125;
+
+
+every(判断数组中的每一个元素是否都满足某个条件)
+
+Array.prototype.my_every = function (cb) &#123;    for (let i = 0; i &lt; this.length; i++) &#123;        if (!cb(this[i], i, this)) &#123;            return false;        &#125;    &#125;    return true;&#125;
+
+
+some（判断数组中是否存在一个元素满足某个条件）
+
+Array.prototype.my_some = function (cb) &#123;    for (let i = 0; i &lt; this.length; i++) &#123;        if (cb(this[i], i, this)) &#123;            return true;        &#125;    &#125;    return false;&#125;
+
+
+reduce
+
+Array.prototype.my_reduce = function (cb, ...args) &#123;    let start, index = 0    if (args.length) &#123;        start = args[0]    &#125; else &#123;        start = this[0];        index = 1    &#125;    for (let i = index; i &lt; this.length; i++) &#123;        start = cb(start, this[i], i, this);    &#125;    return start;&#125;
+
+
+includes
+
+Array.prototype.my_includes = function (item, ...args) &#123;    let index    if (args.length &amp;&amp; !Number.isNaN(Number(args[0])) &amp;&amp; Number(args[0])&gt;0) &#123;        index = Number(args[0])    &#125; else &#123;        index = 0;    &#125;    for (let i = index; i &lt; this.length; i++) &#123;        if (this[i] === item) return true;    &#125;    return false&#125;
+
+
+splice
+
+let arr = [&#x27;a&#x27;, &#x27;b&#x27;, &#x27;c&#x27;, &#x27;d&#x27;, &#x27;e&#x27;]Array.prototype.my_splice = function (start, len, ...args) &#123;   // 如果没有任何参数传递，直接返回空数组    if (arguments.length === 0) &#123;        return [];    &#125;        // 如果 start 是 undefined，设置为 0    if (start === undefined) &#123;        start = 0;    &#125;else if(start&lt;0)&#123;        start = this.length+start         start = !!start?start:0    &#125;    // 如果 len 是 undefined，设置为 0    if (len === undefined) &#123;        len = 0;    &#125;        const res = [], newArr = []    for (let i = 0; i &lt; this.length; i++) &#123;        if (i &lt; start || i &gt;= start + len) &#123;            newArr.push(this[i])        &#125; else &#123;            res.push(this[i])        &#125;        //还有要添加的值是存放在args里的，所以我们还要把args中的值添加到原数组中去        if (i === start - 1) &#123;            newArr.push(...args)        &#125;    &#125;        while (this.length) &#123;        this.pop()    &#125;    this.push(...newArr)    return res&#125;
+
+JS内置方法、对象以及运算符
+new运算符
+
+function myNew (Func, ...arg)&#123;        if (fn.prototype === undefined) throw new TypeError(&#x27;function is not a constructor&#x27;);        let obj = &#123;&#125;  //定义了一个对象。        obj.__proto__ = Func.prototype          //将Func.prototype赋值为对象的__proto__属性,即原型链的概念        let res = Func.call(obj, ...arg) //更改Func的this指向        return res instanceof Object ? res : obj &#125;
+
+
+手撕curry
+
+const my_curry = (fn, ...args) =&gt;    args.length &gt;= fn.length        ? fn(...args)        : (...args1) =&gt; my_curry(fn, ...args, ...args1);function adder(x, y, z) &#123;    return x + y + z;&#125;const add = my_curry(adder);console.log(add(1, 2, 3));  //6console.log(add(1)(2)(3));  //6console.log(add(1, 2)(3));  //6console.log(add(1)(2, 3));  //6
+
+
+手写compose函数
+
+const compose = (...fns)=&gt;(x)=&gt;fns.reduceRight((v, fn)=&gt;fn(v),x);const doubleAndSuare = compose(double, square);//先翻倍再平方console.log(doubleAndSuare(3));
+
+
+手撕vue3响应式代理
+
+//测试代码class Depend &#123;  constructor() &#123;    this.reactiveFns = new Set()//依赖组  &#125;  // 更好的收集依赖  depend() &#123;    if (activeReactiveFn) this.reactiveFns.add(activeReactiveFn)  &#125;  //对所有依赖进行统一通知处理  notify() &#123;    console.log(this.reactiveFns)    this.reactiveFns.forEach(fn =&gt; &#123;      //遍历依赖处理      if (fn) fn()    &#125;)  &#125;&#125;// 封装响应式函数let activeReactiveFn = nullfunction watchFn(fn) &#123;  activeReactiveFn = fn  fn()  activeReactiveFn = null&#125;// 封装一个获取depend函数const targetMap = new WeakMap()function getDepend(target, key) &#123;  // 1、根据target对象获取map的过程  let map = targetMap.get(target)  if (!map) &#123;    map = new Map()    targetMap.set(target, map)  &#125;  // 2、根据对象属性获取depend依赖  let depend = map.get(key)  if (!depend) &#123;    depend = new Depend()    map.set(key, depend)  &#125;  return depend&#125;//使用Proxy监听对象变化function reactive(obj) &#123;  return new Proxy(obj, &#123;    get: function (target, key, receiver) &#123;      const depend = getDepend(target, key)      depend.depend()      return Reflect.get(target, key, receiver)    &#125;,    set: function (target, key, newValue, receiver) &#123;      Reflect.set(target, key, newValue, receiver)      const depend = getDepend(target, key)      depend.notify()    &#125;  &#125;)&#125;const obj = &#123;  name: &quot;coderwhy&quot;,//depend实例对象  age: 18//depend实例对象&#125;const info = &#123;  name:&quot;小余&quot;,  age:18&#125;//响应式开关媒介const objRef = reactive(&#123;  name: &quot;coderwhy&quot;,  age: 18&#125;)const infoRef = reactive(&#123;  name:&quot;小余&quot;,  age:18&#125;)watchFn(() =&gt; &#123;  console.log(infoRef.name);  &#125;)watchFn(() =&gt; &#123;  console.log(objRef.name);  &#125;)infoRef.name = &#x27;响应式-小余&#x27;objRef.name = &#x27;响应式-coderwhy&#x27;// 小余// coderwhy// Set(1) &#123; [Function (anonymous)] &#125;// 响应式-小余// Set(1) &#123; [Function (anonymous)] &#125;// 响应式-coderwhy
+
+
+手撕instanceof
+
+const myInstanceOf=(Left,Right)=&gt;&#123;  if(!Left)&#123;    return false  &#125;  while(Left)&#123;    if(Left.__proto__===Right.prototype)&#123;      return true    &#125;else&#123;      Left=Left.__proto__    &#125;  &#125;  return false&#125;//验证console.log(myInstanceOf(&#123;&#125;,Array));  //false
+
+
+call，bind，apply
+
+function foo(x,y)&#123;  console.log(this.a,x+y);&#125;const obj=&#123;  a:1&#125;Function.prototype.myCall=function(context,...args)&#123;  if(typeof this !== &#x27;function&#x27;)  return new TypeError(&#x27;is not a function&#x27;)  const fn = Symbol(&#x27;fn&#x27;) //使用Symbol尽可能降低myCall对其他的影响  context[fn] = this  //this指向foo  const res = context[fn](...args)  //解构，调用fn  delete context[fn]  //不要忘了删除obj上的工具函数fn  return res  //将结果返回&#125;//验证foo.myCall(obj,1,2)   //1,3function foo(x,y)&#123;  console.log(this.a,x+y);&#125;const obj=&#123;  a:1&#125;Function.prototype.myApply=function(context,args)&#123;  if(typeof this !== &#x27;function&#x27;)  return new TypeError(&#x27;is not a function&#x27;)  const fn = Symbol(&#x27;fn&#x27;) //使用Symbol尽可能降低myCall对其他的影响  context[fn] = this  //this指向foo  const res = context[fn](...args)  //解构，调用fn  delete context[fn]  //不要忘了删除obj上的工具函数fn  return res  //将结果返回&#125;//验证foo.myApply(obj,1,2)   //1,3function foo(x,y,z)&#123;  this.name=&#x27;zt&#x27;  console.log(this.a,x+y+z);&#125;const obj=&#123;  a:1&#125;Function.prototype.myBind=function(context,...args)&#123;  if(typeof this !== &#x27;function&#x27;)  return new TypeError(&#x27;It is not a function&#x27;);  context = context || window; // 上下文环境  const _this = this; // 当前的函数的上下文this  return function F(...arg) &#123;    //判断返回出去的F有没有被new，有就要把foo给到new出来的对象    if (this instanceof F) &#123;       return new _this(...args, ...arg);    &#125; else &#123;       _this.call(this, ...args, ...arg);    &#125;  &#125;&#125;//验证const bar=foo.myBind(obj,1,2)console.log(new bar(3));   //undefined 6  foo &#123; name: &#x27;zt&#x27; &#125;
+
+
+值相等
+
+function compare(data1, data2) &#123;  if (typeof data1 != typeof data2) &#123;    return false;  &#125;  if (typeof data1 != &quot;object&quot; &amp;&amp; typeof data1 == typeof data2) &#123;    return data1 === data2;  &#125;  if ((!data1 instanceof Array &amp;&amp; data2 instanceof Array) || (data1 instanceof Array &amp;&amp; !data2 instanceof Array)) &#123;    return false;  &#125; else if (data1 instanceof Array  &amp;&amp; data2 instanceof Array) &#123;    if (data1.length == data2.length) &#123;      for (let i = 0; i &lt; data1.length; i++) &#123;        if (!compare(data1[i], data2[i])) &#123;          return false;        &#125;      &#125;    &#125; else &#123;      return false;    &#125;  &#125; else &#123;      if (Object.keys(data1).length == Object.keys(data2).length) &#123;      for (let key in data1) &#123;        if (!data2[key] || !compare(data1[key], data2[key])) &#123;          return false;        &#125;      &#125;    &#125; else &#123;      return false;    &#125;  &#125;  return true;&#125;
+
+
+深拷贝
+
+function isObject(value) &#123;  const valueType = typeof value  return (value !== null) &amp;&amp; (valueType === &quot;object&quot; || valueType === &quot;function&quot;)&#125;function deepClone(originValue) &#123;  // 判断传入的originValue是否是一个对象类型  if (!isObject(originValue)) &#123;    return originValue  &#125;  const newObject = &#123;&#125;  for (const key in originValue) &#123;    newObject[key] = deepClone(originValue[key])  &#125;  //返回通过递归深层遍历赋值后，全新的数据对象  return newObject&#125;
+
+
+实现Object.create()
+
+创建一个空对象，定义其原型对象并设置其枚举属性
+// proto 可以是object 或者functionObject.myCreate = function (proto, defineProperties)&#123;    if((typeof proto === &#x27;object&#x27; &amp;&amp; proto !== null) || typeof proto === &#x27;function&#x27;)&#123;        let obj = &#123;&#125;;        // obj.__proto__ = proto;        Object.setPrototypeOf(obj, proto);        Object.defineProperty(obj, defineProperties);        return obj;    &#125;else &#123;        throw new TypeError(&#x27;类型错误&#x27;);    &#125;&#125;
+
+
+实现Object.assign（浅拷贝）
+
+function myAssign(target,...objs)&#123;    if(target === null || target === undefined)&#123;        throw new TypeError(&quot;can not convert null or undefined to object&quot;)    &#125;    let res = Object(target)    objs.forEach(obj =&gt; &#123;        &#x27;use strict&#x27;        if(obj != null &amp;&amp; obj != undefined)&#123;            for(let key in obj)&#123;                //hasOwnProperty用来判断一个属性是定义在对象本身而不是继承自原型链的                if(Object.prototype.hasOwnProperty.call(obj,key))&#123;                    res[key] = obj[key]                &#125;            &#125;        &#125;    &#125;)    return res&#125;Object.defineProperty(Object,&#x27;myAssign&#x27;,&#123;    value: myAssign,    writable: true,    configurable: true,    enumerable: false&#125;)
+
+
+trim方法
+
+function myTrim(str) &#123;  const reg = /^\s+|\s+$/g;  return str.replace(reg, &#x27;&#x27;);&#125;
+
+
+模板字符串
+
+const render = (template, data) =&gt; &#123;    const reg = /\$\&#123;(.*?)\&#125;/g;    template = template.replace(reg, (match, key) =&gt; &#123;        let keys = key.trim().split(&#x27;.&#x27;);        return keys.reduce((obj, k) =&gt; obj?.[k], data) || &#x27;&#x27;;    &#125;)    return template;&#125;
+
+
+sleep函数
+
+function sleep(ms) &#123;    return new Promise((resolve) =&gt; &#123;        setTimeout(() =&gt; &#123;            console.log(&#x27;sleep...&#x27;)            resolve()        &#125;, ms);    &#125;)&#125;async function test()&#123;    console.log(&#x27;1&#x27;);    await sleep(400)    console.log(&#x27;2&#x27;)&#125;test();
+
+
+利用setTimeout实现setInterval
+
+function coustomSetInterval(callback, time) &#123;    let intervalId = null;    function loop() &#123;        intervalId = setTimeout(() =&gt; &#123;            callback();            loop();        &#125;, time)    &#125;    loop();    return () =&gt; clearTimeout(intervalId)&#125;const interval = coustomSetInterval(() =&gt; &#123;    console.log(&#x27;想你了&#x27;)&#125;, 1000)setTimeout(() =&gt; &#123;    interval()&#125;, 5000)
+
+Promise手撕大全
+promise基础
+
+基本结构：
+class MyPromise &#123;    constructor(executor) &#123;        // 定义 resolve        let resolve = res =&gt; &#123;&#125;        // 定义 reject        let reject = err =&gt; &#123;&#125;        // 自动执行        executor(resolve, reject);    &#125;&#125;
+
+基本状态：
+Promise有三种状态：
+
+pending [待定] 初始状态
+fulfilled [实现] 操作成功
+rejected [被否决] 操作失败
+
+promise 状态有如下特点:
+1.promise 对象初始化状态为 pending。
+2.当调用resolve(成功)，会由pending &#x3D;&gt; fulfilled。
+3.当调用reject(失败)，会由pending &#x3D;&gt; rejected。
+class Promise &#123;    constructor(executor) &#123;        this.status = &quot;pending&quot;; // 默认状态        this.value;  // resolve 成功时的值        this.error;  // reject 失败时的值        let resolve = res =&gt; &#123;            if(this.status === &quot;pending&quot;) &#123;                this.value = res;                this.status = &quot;resolved&quot;;            &#125;        &#125;        let reject = err =&gt; &#123;            if(this.status === &quot;pending&quot;) &#123;                this.error = err;                this.status = &quot;rejected&quot;;            &#125;        &#125;        executor(resolve, reject);    &#125;&#125;
+
+
+then方法实现
+
+该方法接收两个回调：onFulfilled(成功)、onRejected(失败回调)
+promise.then(onFulfilled, onRejected); 1.onFulfilled(onResolved)：可选参数，如果不是函数则必须忽略。 2.onRejected：可选参数，如果不是函数则必须忽略。 3.当promise成功执行，所有onFulfilled按注册顺序执行，如果promise被拒绝，所有onRejected按注册顺序执行。 4.onFulfilled 和 onRejected必须作为纯函数调用。 5.promise的executor执行完毕并调用resolve或reject方可调用then参数onFulfilled 和 onRejected。 6.无论promise状态是resolved还是rejected，只要还有未执行onFulfilled,onRejected或catch（只处理reject状态）存在且调用，返回的promise均为resolved状态。
+const PROMISE_STATUS_PENDING = &#x27;pending&#x27;const PROMISE_STATUS_FULFILLED = &#x27;fulfilled&#x27;const PROMISE_STATUS_REJECTED = &#x27;rejected&#x27;// 工具函数function execFunctionWithCatchError(execFn, value, resolve, reject) &#123;    try &#123;        const result = execFn(value)        resolve(result)    &#125; catch (err) &#123;        reject(err)    &#125;&#125;class MyPromise &#123;    constructor(executor) &#123;        this.status = PROMISE_STATUS_PENDING        this.value = undefined        this.reason = undefined        this.onFulfilledFns = []        this.onRejectedFns = []        const resolve = (value) =&gt; &#123;            if (this.status === PROMISE_STATUS_PENDING) &#123;                // 检测 value 是否为 Promise                if (value instanceof MyPromise) &#123;                    // 如果 value 是 Promise，等待它兑现或拒绝                    value.then(resolve, reject);                    return;                &#125;                // 检测 value 是否为 thenable                if (value !== null &amp;&amp; (typeof value === &#x27;object&#x27; || typeof value === &#x27;function&#x27;)) &#123;                    let then;                    try &#123;                        then = value.then;                    &#125; catch (error) &#123;                        reject(error);                        return;                    &#125;                    // 如果 then 是函数，认为 value 是一个 thenable 对象                    if (typeof then === &#x27;function&#x27;) &#123;                        let called = false; // 避免多次调用                        try &#123;                            then.call(value, (y) =&gt; &#123;                                if (called) return;                                called = true;                                resolve(y);                            &#125;, (r) =&gt; &#123;                                if (called) return;                                called = true;                                reject(r);                            &#125;);                        &#125; catch (error) &#123;                            if (called) return;                            called = true;                            reject(error);                        &#125;                        return;                    &#125;                &#125;                // 添加微任务                queueMicrotask(() =&gt; &#123;                    if (this.status !== PROMISE_STATUS_PENDING) return                    this.status = PROMISE_STATUS_FULFILLED                    this.value = value                    this.onFulfilledFns.forEach(fn =&gt; &#123;                        fn(this.value)                    &#125;)                &#125;);            &#125;        &#125;        const reject = (reason) =&gt; &#123;            if (this.status === PROMISE_STATUS_PENDING) &#123;                // 检测 value 是否为 Promise                if (reason instanceof MyPromise) &#123;                    // 如果 value 是 Promise，等待它兑现或拒绝                    value.then(resolve, reject);                    return;                &#125;                // 检测 value 是否为 thenable                if (reason !== null &amp;&amp; (typeof reason === &#x27;object&#x27; || typeof reason === &#x27;function&#x27;)) &#123;                    let then;                    try &#123;                        then = reason.then;                    &#125; catch (error) &#123;                        reject(error);                        return;                    &#125;                    // 如果 then 是函数，认为 value 是一个 thenable 对象                    if (typeof then === &#x27;function&#x27;) &#123;                        let called = false; // 避免多次调用                        try &#123;                            then.call(reason, (y) =&gt; &#123;                                if (called) return;                                called = true;                                resolve(y);                            &#125;, (r) =&gt; &#123;                                if (called) return;                                called = true;                                reject(r);                            &#125;);                        &#125; catch (error) &#123;                            if (called) return;                            called = true;                            reject(error);                        &#125;                        return;                    &#125;                &#125;                // 添加微任务                queueMicrotask(() =&gt; &#123;                    if (this.status !== PROMISE_STATUS_PENDING) return                    this.status = PROMISE_STATUS_REJECTED                    this.reason = reason                    this.onRejectedFns.forEach(fn =&gt; &#123;                        fn(this.reason)                    &#125;)                &#125;)            &#125;        &#125;        try &#123;            executor(resolve, reject)        &#125; catch (err) &#123;            reject(err)        &#125;    &#125;    then(onFulfilled, onRejected) &#123;        return new MyPromise((resolve, reject) =&gt; &#123;            // 1.如果在then调用的时候, 状态已经确定下来            if (this.status === PROMISE_STATUS_FULFILLED &amp;&amp; onFulfilled) &#123;                execFunctionWithCatchError(onFulfilled, this.value, resolve, reject)            &#125;            if (this.status === PROMISE_STATUS_REJECTED &amp;&amp; onRejected) &#123;                execFunctionWithCatchError(onRejected, this.reason, resolve, reject)            &#125;            // 2.将成功回调和失败的回调放到数组中            if (this.status === PROMISE_STATUS_PENDING) &#123;                this.onFulfilledFns.push(() =&gt; &#123;                    execFunctionWithCatchError(onFulfilled, this.value, resolve, reject)                &#125;)                this.onRejectedFns.push(() =&gt; &#123;                    execFunctionWithCatchError(onRejected, this.reason, resolve, reject)                &#125;)            &#125;        &#125;)    &#125;    catch(onRejected) &#123;        this.then(undefined, onRejected);    &#125;&#125;const promise = new MyPromise((resolve, reject) =&gt; &#123;    console.log(&quot;状态pending&quot;)    resolve(2222)&#125;)// 调用then方法多次调用promise.then(res =&gt; &#123;    console.log(&quot;res1:&quot;, res)    return new Promise((resolve, reject) =&gt; &#123;        console.log(&quot;状态pending-----&quot;)        reject(&#x27;simon&#x27; + res);    &#125;)&#125;, err =&gt; &#123;    console.log(&quot;err1:&quot;, err)    return &quot;bbbbb&quot;&#125;).then(res =&gt; &#123;    console.log(&quot;res2:&quot;, res)&#125;, err =&gt; &#123;    console.log(&quot;err2:&quot;, err)&#125;)
+
+
+Promise.reject和Promise.resolve
+
+class MyPromise &#123;    // ...    // 将现有对象转为 Promise 对象    static resolve(value) &#123;        // 如果参数是 Promise 实例，那么Promise.resolve将不做任何修改、原封不动地返回这个实例。        if (value instanceof Promise) return value;        // 参数是一个thenable对象（具有then方法的对象）,Promise.resolve方法会将这个对象转为 Promise 对象，然后就立即执行thenable对象的then方法。        if (typeof value === &#x27;object&#x27; || typeof value === &#x27;function&#x27;) &#123;            try &#123;                let then = value.then;                if (typeof then === &#x27;function&#x27;) &#123;                    return new Promise(then.bind(value));                &#125;            &#125; catch (e) &#123;                return new Promise((resolve, reject) =&gt; &#123;                    reject(e);                &#125;)            &#125;        &#125;        // 参数不是具有then方法的对象，或根本就不是对象,Promise.resolve方法返回一个新的 Promise 对象，状态为resolved。        return new Promise((resolve, reject) =&gt; &#123;            resolve(value);        &#125;)    &#125;&#125;class MyPromise &#123;    // ...    // 返回一个新的 Promise 实例，该实例的状态为rejected。    static reject(reason) &#123;        return new Promise((resolve, reject) =&gt; &#123;            reject(reason);        &#125;)    &#125;&#125;
+
+
+Promise.catch
+
+class MyPromise &#123;    // ...    // 是.then(null, rejection)或.then(undefined, rejection)的别名，用于指定发生错误时的回调函数。    catch(onRejected) &#123;        return this.then(undefined, onRejected);    &#125;&#125;
+
+
+Promise.finally
+
+class MyPromise &#123;    // ...    // 用于指定不管 Promise 对象最后状态如何，都会执行的操作。    finally(callback) &#123;        return this.then(            value =&gt; Promise.resolve(callback()).then(() =&gt; value),            reason =&gt; Promise.resolve(callback()).then(() =&gt; &#123; throw reason &#125;)        )    &#125;&#125;
+
+
+Promise.all方法
+
+static all(promises) &#123;  // 问题关键: 什么时候要执行resolve, 什么时候要执行reject  return new MyPromise((resolve, reject) =&gt; &#123;    //存储所有遍历resolve结果    const values = []    promises.forEach(promise =&gt; &#123;      promise.then(res =&gt; &#123;        //收集所有成功结果        values.push(res)        //promise全部正常调用resolve，返回存储所有内容的结果        if (values.length === promises.length) &#123;          resolve(values)        &#125;      &#125;, err =&gt; &#123;        //有一个拒绝状态，则直接返回err内容        reject(err)      &#125;)    &#125;)  &#125;)&#125;
+
+
+Promise.allSettled方法
+
+static allSettled(promises) &#123;  // 问题关键: 什么时候要执行resolve, 什么时候要执行reject  return new MyPromise((resolve, reject) =&gt; &#123;    const values = []    promises.forEach(promise =&gt; &#123;      promise.then(res =&gt; &#123;        values.push(&#123; status: PROMISE_STATUS_FULFILLED, value: res &#125;)        if (values.length === promises.length) resolve(values)      &#125;, err =&gt; &#123;        values.push(&#123; status: PROMISE_STATUS_REJECTED, reason: err &#125;)        if (values.length === promises.length) resolve(values)      &#125;)    &#125;)  &#125;)&#125;
+
+
+Promise.race方法
+
+static race(promises) &#123;  return new HYPromise((resolve, reject) =&gt; &#123;    promises.forEach(promise =&gt; &#123;      // promise.then(res =&gt; &#123;      //   resolve(res)      // &#125;, err =&gt; &#123;      //   reject(err)      // &#125;)      //代码优化      promise.then(resolve, reject)    &#125;)  &#125;)&#125;
+
+
+Promise.any方法
+
+static any(promises) &#123;  // resolve必须等到有一个成功的结果  // reject所有的都失败才执行reject  const reasons = []  return new HYPromise((resolve, reject) =&gt; &#123;    promises.forEach(promise =&gt; &#123;      promise.then(resolve, err =&gt; &#123;        reasons.push(err)        if (reasons.length === promises.length) &#123;          reject(new AggregateError(reasons))        &#125;      &#125;)    &#125;)  &#125;)&#125;
+
+
+Async await原理
+
+function run(genF) &#123;    // 返回值是Promise    return new Promise((resolve, reject) =&gt; &#123;        const gen = genF();        function step(nextF) &#123;            let next;            try &#123;                // 执行该函数，获取一个有着value和done两个属性的对象                next = nextF();            &#125; catch (e) &#123;                // 出现异常则将该Promise变为rejected状态                reject(e);            &#125;            // 判断是否到达末尾，Generator函数到达末尾则将该Promise变为fulfilled状态            if (next.done) &#123;                return resolve(next.value);            &#125;            // 没到达末尾，则利用Promise封装该value，直到执行完毕，反复调用step函数，实现自动执行            Promise.resolve(next.value).then((v) =&gt; &#123;                step(() =&gt; gen.next(v))            &#125;, (e) =&gt; &#123;                step(() =&gt; gen.throw(e))            &#125;)        &#125;        step(() =&gt; gen.next(undefined));    &#125;)&#125;或者使用迭代器函数function readFile(file) &#123;        return new Promise(resolve =&gt; &#123;                setTimeout(() =&gt; &#123;                        resolve(file);    &#125;, 1000);        &#125;)&#125;;function asyncFunc(generator) &#123;        const iterator = generator(); // 接下来要执行next  // data为第一次执行之后的返回结果，用于传给第二次执行  const next = (data) =&gt; &#123;                let &#123; value, done &#125; = iterator.next(data); // 第二次执行，并接收第一次的请求结果 data        if (done) return; // 执行完毕(到第三次)直接返回    // 第一次执行next时，yield返回的 promise实例 赋值给了 value    value.then(data =&gt; &#123;      next(data); // 当第一次value 执行完毕且成功时，执行下一步(并把第一次的结果传递下一步)    &#125;);  &#125;  next();&#125;;asyncFunc(function* () &#123;        // 生成器函数：控制代码一步步执行   let data = yield readFile(&#x27;a.js&#x27;); // 等这一步骤执行执行成功之后，再往下走，没执行完的时候，直接返回  data = yield readFile(data + &#x27;b.js&#x27;);  return data;&#125;)
+
+模板渲染引擎&lt;!DOCTYPE html&gt;&lt;html lang=&quot;zh&quot;&gt;&lt;head&gt;    &lt;meta charset=&quot;UTF-8&quot;&gt;    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;    &lt;title&gt;模板渲染示例&lt;/title&gt;&lt;/head&gt;&lt;body&gt;    &lt;div id=&quot;app&quot;&gt;&lt;/div&gt;    &lt;script src=&quot;script.js&quot;&gt;&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;// 渲染引擎function renderTemplate(template, data) &#123;    // 处理条件判断    template = template.replace(/&#123;&#123;\s*#if\s*(\w+)\s*&#125;&#125;([\s\S]*?)&#123;&#123;\s*\/if\s*&#125;&#125;/g, function (_, condition, content) &#123;        return data[condition] ? content : &#x27;&#x27;;    &#125;);    // 处理循环    template = template.replace(/&#123;&#123;\s*#each\s*(\w+)\s*&#125;&#125;([\s\S]*?)&#123;&#123;\s*\/each\s*&#125;&#125;/g, function (_, arrayKey, content) &#123;        let result = &#x27;&#x27;;        let array = data[arrayKey];        if (Array.isArray(array)) &#123;            array.forEach((item, index) =&gt; &#123;                // 创建一个独立作用域，避免冲突                let temp = content;                // 替换模板内的 &#123;&#123; this &#125;&#125; 为循环项                temp = temp.replace(/&#123;&#123;\s*this\s*&#125;&#125;/g, function () &#123;                    return item;                &#125;);                // 如果是对象，处理它的属性                temp = temp.replace(/&#123;&#123;\s*this\.(\w+)\s*&#125;&#125;/g, function (_, prop) &#123;                    return item[prop] || &#x27;&#x27;;                &#125;);                // 替换循环索引（如果需要）                temp = temp.replace(/&#123;&#123;\s*index\s*&#125;&#125;/g, index);                // 将处理后的结果添加到最终结果中                result += temp;            &#125;);        &#125;        return result;    &#125;);    // 替换变量，一定要放到最后！！    template = template.replace(/\&#123;\&#123;(.*?)\&#125;\&#125;/g, (match, key) =&gt; &#123;        let keys = key.trim().split(&#x27;.&#x27;);        return keys.reduce((obj, k) =&gt; obj?.[k], data) || &#x27;&#x27;;    &#125;)    return template;&#125;// 定义数据const data = &#123;    name: &quot;张三&quot;,    age: 25,    isEmployed: true,    occupation: &quot;工程师&quot;,    hobbies: [&quot;阅读&quot;, &quot;编程&quot;, &quot;旅游&quot;],    friends: [        &#123; name: &quot;李四&quot;, age: 26 &#125;,        &#123; name: &quot;王五&quot;, age: 24 &#125;    ]&#125;;// 定义模板const template = `    &lt;h1&gt;个人信息&lt;/h1&gt;    &lt;p&gt;姓名: &#123;&#123; name &#125;&#125;&lt;/p&gt;    &lt;p&gt;年龄: &#123;&#123; age &#125;&#125;&lt;/p&gt;    &lt;p&gt;职业: &#123;&#123; occupation &#125;&#125;&lt;/p&gt;    &#123;&#123;#if isEmployed&#125;&#125;        &lt;p&gt;当前状态: 在职&lt;/p&gt;    &#123;&#123;/if&#125;&#125;    &lt;h2&gt;兴趣爱好&lt;/h2&gt;    &lt;ul&gt;        &#123;&#123;#each hobbies&#125;&#125;            &lt;li&gt;&#123;&#123; this &#125;&#125;&lt;/li&gt;        &#123;&#123;/each&#125;&#125;    &lt;/ul&gt;    &lt;h2&gt;朋友列表&lt;/h2&gt;    &lt;ul&gt;        &#123;&#123;#each friends&#125;&#125;            &lt;li&gt;&#123;&#123; this.name &#125;&#125; - &#123;&#123; this.age &#125;&#125; 岁&lt;/li&gt;        &#123;&#123;/each&#125;&#125;    &lt;/ul&gt;`;// 渲染模板并插入 HTMLdocument.getElementById(&#x27;app&#x27;).innerHTML = renderTemplate(template, data);
+
+防抖截流const debounce = (fn, ms, Immediate = false) =&gt; &#123;    // Immediate选择是否立即执行    let timer = null;    return function (...thisArgs) &#123;        if (timer) &#123;            clearTimeout(timer)        &#125;        if (Immediate) &#123;            let flag = !timer            flag &amp;&amp; fn.apply(this, thisArgs)            timer = setTimeout(() =&gt; &#123;                timer = null            &#125;, ms)        &#125; else &#123;            timer = setTimeout(() =&gt; &#123;                fn.apply(this, thisArgs)                timer = null            &#125;, ms)        &#125;    &#125;&#125;const throttle = (fn, ms) =&gt; &#123;    let timer = null;    return function (...thisArgs) &#123;        if (!timer) &#123;            fn.apply(this, thisArgs);            timer = setTimeout(() =&gt; &#123;                timer = null;            &#125;, ms);        &#125;    &#125;&#125;
+
+技巧
+数组去重
+
+let arr = [1, 0, 2, 3, 4, 5, 2, 3, 4];//indexOf去重function removeRepeat(arr) &#123;  let res = [];  for (let i of arr) &#123;    if (res.indexOf(i) == -1) &#123;      res.push(i);    &#125;  &#125;  return res;&#125;// set 去重function removeRepeat(arr) &#123;  let res = new Set(arr);  return Array.from(res);&#125;// for循环去重function removeRepeat(arr) &#123;  for (let i = 0; i &lt; arr.length; i++) &#123;    for (let j = i + 1; j &lt; arr.length; j++) &#123;      if (arr[i] == arr[j]) &#123;        arr.splice(j, 1);        j--;      &#125;    &#125;  &#125;  return arr;&#125;// filter 去重function removeRepeat(arr) &#123;  return arr.filter((item, index) =&gt; &#123;    return arr.indexOf(item) == index;  &#125;);&#125;// includes 去重function removeRepeat(arr) &#123;  let res = [];  for (let i of arr) &#123;    if (!res.includes(i)) &#123;      res.push(i);    &#125;  &#125;  return res;&#125;let res = removeRepeat(arr);console.log(res);
+
+
+快排和归并
+
+Array.prototype.quicksort = function (l, r) &#123;    if (l &gt;= r) return this;    let key = this[l];    let i = l - 1, j = r + 1;    while (i &lt; j) &#123;        do i++; while (this[i] &lt; key);        do j--; while (this[j] &gt; key);        if (i &lt; j) [this[i], this[j]] = [this[j], this[i]];    &#125;    this.quicksort(l, j);    this.quicksort(j + 1, r);    return this;&#125;let arr = [5,8,3,6,4,2];console.log(arr.quicksort(0, arr.length-1));Array.prototype.mergesort = function (temp, l, r) &#123;    if (l &gt;= r) return this;    let mid = l + r &gt;&gt; 1;    this.mergesort(temp, l, mid);    this.mergesort(temp, mid + 1, r);    let i = l, j = mid + 1, k = 0;    while (i &lt;= mid &amp;&amp; j &lt;= r) &#123;        if (this[i] &lt;= this[j]) temp[k++] = this[i++];        else temp[k++] = this[j++];    &#125;    while (i &lt;= mid) temp[k++] = this[i++];    while (j &lt;= r) temp[k++] = this[j++];    for (let m = 0, n = l; n &lt;= r; m++, n++) &#123;        this[n] = temp[m];    &#125;    return this;&#125;let arr = [7, 1, 0, 3, 0, 5, 6, 4];console.log(arr.mergesort(Array(arr.length).fill(0), 0, arr.length - 1));
+
+
+下划线和驼峰相互转换
+
+//方式一：操作字符串数组function transformStr2Hump1(str) &#123;    if(str == null) &#123;        return &quot;&quot;;    &#125;    var strArr = str.split(&#x27;-&#x27;);    for(var i = 1; i &lt; strArr.length; i++) &#123;        strArr[i] = strArr[i].charAt(0).toUpperCase() + strArr[i].substring(1);    &#125;    return strArr.join(&#x27;&#x27;);&#125;//方式二：操作字符数组function transformStr2Hump2(str) &#123;    if(str == null) &#123;        return &quot;&quot;;    &#125;    var strArr  =str.split(&#x27;&#x27;);    for(var i = 0; i &lt; strArr.length; i++) &#123;        if(strArr[i] == &quot;-&quot;)&#123;            //删除-            strArr.splice(i, 1);            //将该处改为大写            if(i &lt; strArr.length) &#123;                strArr[i] = strArr[i].toUpperCase();            &#125;        &#125;    &#125;    return strArr.join(&quot;&quot;);&#125;//方式三：利用正则function transformStr2Hump3(str) &#123;    if(str == null) &#123;        return &quot;&quot;;    &#125;    var reg = /-(\w)/g;//匹配字母或数字或下划线或汉字    return str.replace(reg, function($0, $1) &#123;        return $1.toUpperCase();    &#125;)&#125;
+
+
+懒加载
+
+
+首先，不要将图片地址放到src属性中，而是放到其它属性(data-original)中。
+页面加载完成后，根据scrollTop判断图片是否在用户的视野内，如果在，则将data-original属性中的值取出存放到src属性中。
+在滚动事件中重复判断图片是否进入视野，如果进入，则将data-original属性中的值取出存放到src属性中。
+
+
+ elementNode.getAttribute(name)：方法通过名称获取属性的值。
+ elementNode.setAttribute(name, value)：方法创建或改变某个新属性。
+ elementNode.removeAttribute(name)：方法通过名称删除属性的值。
+
+//懒加载代码实现var viewHeight = document.documentElement.clientHeight;//可视化区域的高度function lazyload () &#123;    //获取所有要进行懒加载的图片    let eles = document.querySelectorAll(&#x27;img[data-original][lazyload]&#x27;);//获取属性名中有data-original的    Array.prototype.forEach.call(eles, function(item, index) &#123;        let rect;        if(item.dataset.original === &#x27;&#x27;) &#123;            return;        &#125;        rect = item.getBoundingClientRect();        //图片一进入可视区，动态加载        if(rect.bottom &gt;= 0 &amp;&amp; rect.top &lt; viewHeight) &#123;            !function () &#123;                let img = new Image();                img.src = item.dataset.original;                img.onload = function () &#123;                    item.src = img.src;                &#125;                item.removeAttribute(&#x27;data-original&#x27;);                item.removeAttribute(&#x27;lazyload&#x27;);            &#125;();        &#125;    &#125;)&#125;lazyload();document.addEventListener(&#x27;scroll&#x27;, lazyload);
+
+
+数组扁平化
+
+//传入参数 决定扁平化的阶数Array.prototype._flat = function (n) &#123;    let result = [];    let num = n;    for (let item of this) &#123;        // 如果是数组        if (Array.isArray(item)) &#123;            n--;            //   没有扁平化的空间 直接推入            if (n &lt; 0) &#123;                result.push(item);            &#125;            // 继续扁平化 并将n传入 决定item这一个数组中的扁平化            else &#123;                result.push(...item._flat(n));            &#125;        &#125;        // 不是数组直接推入        else &#123;            result.push(item);        &#125;        // 每次循环 重置n 为传入的参数 因为每一项都需要扁平化 需要进行判断        n = num;    &#125;    return result;&#125;;let arr = [1, 2, [3, 4], [5, 6, [7, 8]]];let res = arr._flat(1);console.log(res); // [ 1, 2, 3, 4, 5, 6, [ 7, 8 ] ]
+
+
+计算属性
+
+请不要为所有函数添加缓存！
+const computed = (func, content) =&gt; &#123;    let cache = Object.create(null);    content = content || this;    return (...key) =&gt; &#123;        console.log(cache)        if (!cache[key]) &#123;            cache[key] = func.apply(content, key);        &#125;        return cache[key];    &#125;&#125;
+
+
+有并发限制的Promise调度器
+
+class Scheduler&#123;    constructor(limit)&#123;        this.limit = limit;        this.running = 0;        this.queue = [];    &#125;    createTask(callback, duration)&#123;        return ()=&gt;&#123;            return new Promise((resolve, reject)=&gt;&#123;                setTimeout(()=&gt;&#123;                    callback();                    resolve();                &#125;,duration);            &#125;);        &#125;;    &#125;        add(callback, duration)&#123;        const task = this.createTask(callback, duration);        this.queue.push(task);    &#125;        start()&#123;        for(let i=0;i&lt;this.limit;++i)&#123;            this.schedule();        &#125;    &#125;    schedule()&#123;        if(this.queue.length === 0 || this.running &gt;= this.limit)return;        this.running++;        const task = this.queue.shift();                task().then(()=&gt;&#123;            this.running--;            schedule();        &#125;);    &#125;&#125;
+
+网络请求和跨域解决方案
+原生ajax
+
+function sendajax() &#123;    // 1、 初始化xhr对象    const xhr = new XMLHttpRequest();    //  2、 建立连接 设置请求方法和url    xhr.open(&quot;get&quot;, &quot;./data.json&quot;);    //   3、发送请求    xhr.send();    //   4、状态改变时 进行回调    xhr.onreadystatechange = function () &#123;        // readyState 有0-4 五个值        // 0 代表 未初始化 1 代表 初始化成功 2 代表发送请求        // 3 代表返回了部分数据 4 代表返回了全部数据        if (xhr.readyState == 4) &#123;            if (xhr.status &gt;= 200 &amp;&amp; xhr.status &lt; 300) &#123;                //   进行成功的操作                console.log(xhr.responseText);            &#125;        &#125;    &#125;;&#125;sendajax();
+
+
+JSONP跨域
+
+首先在客户端注册一个callback，然后把callback的名字传给服务器。此时，服务器先生成json数据，然后以JavaScript的语法方式，生成function，function的名字就是传递上来带参数的jsonp，最后将json数据直接以入参的方式，放置在function中，这样子就生成JavaScript语法文档，返回给客户端。客户端浏览器，通过解析，并执行返回JavaScript文档，此时数据作为参数，传入到客户端预先定义好的callback函数中，简单地说，就是利用script标签没有跨域限制地漏洞来达到第三方通讯的目的（href、src 都不受同源策略的限制。）
+优点：
+
+它不像XMLHttpRequest对象实现的Ajax请求那样受到同源策略的限制，JSONP可以跨越同源策略；
+它的兼容性更好，在更加古老的浏览器中都可以运行，不需要XMLHttpRequest或ActiveX的支持；
+
+缺点:
+
+它只支持GET请求而不支持POST等其它类型的HTTP请求
+它只支持跨域HTTP请求这种情况，不能解决不同域的两个页面之间如何进行JavaScript调用的问题。
+jsonp在调用失败的时候不会返回各种HTTP状态码。
+需要后端配合
+
+function jsonp(&#123;url,params,cb&#125;)&#123;        return new Promise((resolve, reject)=&gt;&#123;                window[cb] = function(data)&#123;                        console.log(data)                        resolve(data);                        document.body.removeChild(script);                &#125;//window对象上设置show方法                params= &#123;...params,cb&#125;                let arrs = [];                for (let key in params)&#123;                        arrs.push(`$&#123;key&#125;=$&#123;params[key]&#125;`)                &#125;                let script = document.createElement(&#x27;script&#x27;);                script.src = `$&#123;url&#125;?$&#123;arrs.join(&#x27;&amp;&#x27;)&#125;`;                script.onerror = () =&gt; reject(&#x27;加载失败&#x27;)                 document.body.appendChild(script);                &#125;)&#125;jsonp(&#123;        url:&quot;http://localhost:3000/users&quot;,        params:&#123;name:&quot;jin&quot;,age:12&#125;,        cb:&#x27;show&#x27;&#125;).then(data=&gt;&#123;        console.log(data)&#125;)
+
+后端：
+let express = require(&#x27;express&#x27;);let app = express();app.get(&#x27;/users&#x27;, function(req, res, next) &#123;        // 模拟的数据        let &#123;name,age,cb&#125; = req.query        let data = `&quot;$&#123;name&#125;现在$&#123;age&#125;岁&quot;`        res.send(`$&#123;cb&#125;($&#123;data&#125;)`);// show(data)&#125;);app.listen(3000)
+
+
+cors跨域
+
+同源策略是不允许接收响应而不是不允许发送请求，所以可以通过在响应头中设置某些字段来允许满足条件的请求跨域，比如设置 Access-Control-Allow-Origin 字段允许来自某个源的请求跨域，比如设置 Access-Control-Allow-Methods 字段允许’GET’或者’POST’方式的请求跨域
+后端：
+let express = require(&#x27;express&#x27;);let app = express();app.all(&#x27;*&#x27;, function (req, res, next) &#123;  let origin = req.headers.origin        //设置哪个源可以访问我  res.header(&quot;Access-Control-Allow-Origin&quot;,origin);        // 允许携带哪个头访问我  res.header(&quot;Access-Control-Allow-Headers&quot;, &quot;name&quot;);        // 允许哪个方法访问我  res.header(&quot;Access-Control-Allow-Methods&quot;, &quot;POST&quot;);        // 允许携带cookie  res.set(&quot;Access-Control-Allow-Credentials&quot;, true);        // 预检的存活时间  res.header(&quot;Access-Control-Max-Age&quot;, 6);        // 允许前端获取哪个头        res.header(&quot;Access-Control-Expose-Headers&quot;, &quot;name&quot;);        // 请求头的格式  res.header(&quot;Content-Type&quot;, &quot;application/json;charset=utf-8&quot;);          next();&#125;);app.post(&#x27;/getData&#x27;, function(req, res, next) &#123;        console.log(req.headers)        res.send(&quot;你拿不到数据了！&quot;);&#125;);app.listen(4000)
+
+
+非简单请求是那种对服务器有特殊要求的请求，比如请求方法是PUT或DELETE，或者Content-Type字段的类型是application/json。
+非简单请求的CORS请求，会在正式通信之前，增加一次HTTP查询请求，称为”预检”请求（preflight）。
+浏览器先询问服务器，当前网页所在的域名是否在服务器的许可名单之中，以及可以使用哪些HTTP动词和头信息字段。只有得到肯定答复，浏览器才会发出正式的XMLHttpRequest请求，否则就报错。 代码修改一下：
+// 在请求头的设置中加上if(req.method ===&#x27;OPTIONS&#x27;)&#123;    res.end();//OPTIONS请求不做任何处理&#125;
+
+
+
+postMessage跨域
+
+「window.postMessage()」 方法可以安全地实现跨源通信。通常，对于两个不同页面的脚本，只有当执行它们的页面位于具有相同的协议（通常为 https），端口号（443 为 https 的默认值），以及主机 (两个页面的模数 [Document.domain]设置为相同的值) 时，这两个脚本才能相互通信。「window.postMessage()」 方法提供了一种受控机制来规避此限制，只要正确的使用，这种方法就很安全。
+用途
+1.页面和其打开的新窗口的数据传递
+2.多窗口之间消息传递
+3.页面与嵌套的 iframe 消息传递
+实现
+a.html
+&lt;iframe src=&quot;http://localhost:4000/b.html&quot; frameborder=&quot;0&quot; id=&quot;frame&quot; onload=&quot;load()&quot;&gt;&lt;/iframe&gt;&lt;script&gt;    function load()&#123;        let frame = document.getElementById(&#x27;frame&#x27;);        frame.contentWindow.postMessage(&#x27;你好&#x27;,&#x27;http://localhost:4000/&#x27;);        //接收        window.onmessage= function(e)&#123;            console.log(e.data)        &#125;    &#125;&lt;/script&gt;
+
+b.html
+window.onmessage = function(e)&#123;    console.log(e.data);    //发送    e.source.postMessage(&#x27;hello&#x27;,e.origin)&#125;
+
+
+本地代理跨域
+
+proxy其实就是因为浏览器同源协议无法请求非同源的地址，但是服务器直接没有同源协议，利用将本地请求转到本地服务器进行代理转发，从而绕过了同源协议的限制，通过代理的实现可以解决跨域的问题
+通过设置一个 node 后端作为中间层，前端发送的请求首先到达这个中间层，然后再由中间层将请求转发到目标服务器。响应过程也是如此，服务器先响应给中间层，中间层再将响应数据发送回前端。
+这个中间层就起到了一个代理的作用。这样，浏览器看到的是同源请求，从而绕过了CORS限制。
+假设前端现在要将请求发送给 http://192.168.1.63:3000 这个后端，就可以先由本机的 3001 端口作一个代理
+&lt;!-- 前端 --&gt;&lt;body&gt;    &lt;script&gt;        const xhr = new XMLHttpRequest()        xhr.open(&#x27;GET&#x27;, &#x27;https://localhost:3001&#x27;)        xhr.send()        xhr.onreadystatechange = function() &#123;            if (xhr.readyState === 4 &amp;&amp; xhr.status === 200) &#123;                console.log(xhr.responseText)            &#125;        &#125;    &lt;/script&gt;&lt;/body&gt;
+
+本机后端
+// 后端const http = require(&#x27;http&#x27;)// 监听本机3001端口，有新请求时调用回调函数http.createServer((req, res)  =&gt; &#123;    // 设置响应头，以允许前端应用访问响应内容    res.writeHead(200, &#123;        &#x27;Access-Control-Allow-Origin&#x27;: &#x27;*&#x27;    &#125;)    // 转发请求到目标服务器，并处理响应    http.request(&#123;        host: &#x27;192.168.1.63&#x27;,        port: 3000,        path: &#x27;/&#x27;,        method: &#x27;GET&#x27;,        headers: &#123;&#125;    &#125;, proxyRes =&gt; &#123;        proxyRes.on(&#x27;data&#x27;, chunk =&gt; &#123;            res.end(chunk.toString())        &#125;)    &#125;).end()    &#125;).listen(3001)
+
+各脚手架的proxy配置：Webpack (4.x)在webpack中可以配置proxy来快速获得接口代理的能力。
+const path = require(&quot;path&quot;);const HtmlWebpackPlugin = require(&quot;html-webpack-plugin&quot;);module.exports = &#123;  entry: &#123;    index: &quot;./index.js&quot;  &#125;,  output: &#123;    filename: &quot;bundle.js&quot;,    path: path.resolve(__dirname, &quot;dist&quot;)  &#125;,  devServer: &#123;    port: 8000,    proxy: &#123;      &quot;/api&quot;: &#123;        target: &quot;http://localhost:8080&quot;      &#125;    &#125;  &#125;,  plugins: [    new HtmlWebpackPlugin(&#123;      filename: &quot;index.html&quot;,      template: &quot;webpack.html&quot;    &#125;)  ]&#125;;
+
+Vue-cli 2.x// config/index.js...proxyTable: &#123;  &#x27;/api&#x27;: &#123;     target: &#x27;http://localhost:8080&#x27;,  &#125;&#125;,...
+
+Vue-cli 3.x// vue.config.js 如果没有就新建module.exports = &#123;  devServer: &#123;    port: 8000,    proxy: &#123;      &quot;/api&quot;: &#123;        target: &quot;http://localhost:8080&quot;      &#125;    &#125;  &#125;&#125;;
+
+viteimport &#123; defineConfig &#125; from &#x27;vite&#x27;import vue from &#x27;@vitejs/plugin-vue&#x27;import styleImport, &#123; VantResolve &#125; from &#x27;vite-plugin-style-import&#x27;;// https://vitejs.dev/config/export default defineConfig(&#123;  plugins: [    vue(),    styleImport(&#123;      resolves: [VantResolve()],    &#125;),],    server: &#123; //主要是加上这段代码      host: &#x27;127.0.0.1&#x27;,      port: 3000,      proxy: &#123;        &#x27;/api&#x27;: &#123;          target: &#x27;http://127.0.0.1:8888&#x27;,        //实际请求地址          changeOrigin: true,          rewrite: (path) =&gt; path.replace(/^\/api/, &#x27;&#x27;)        &#125;,      &#125;    &#125;&#125;)
+
+nginx反向代理跨域反向代理与本地代理相反。本地代理是客户端搞定的，反向代理就是服务端搞定的
+反向代理的是在服务端内部完成。
+是服务端（数据应用）向服务端（网页应用）发送数据， 服务端向客户端发送数据 其本质是在服务端（网页应用）通过配置Access-Control-Allow-Origin * 来解决跨域问题。相当于对后端接口进行了统一的cors配置
+Access-Control-Allow-Origin: * 值表明，该资源可以被任意外源访问。
+    #通过配置nginx文件既可        events&#123;&#125;http&#123;    include       mime.types;    default_type  application/octet-stream;    server&#123;        listen 80;        server_name 127.0.0.1;        root D:/nginx-1.26.1/dist;        index index.html;        location / &#123;                  location /api &#123;                proxy_pass http://127.0.0.1:8080/;                proxy_set_header Host $host;                proxy_set_header X-Real-IP $remote_addr;                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;                proxy_set_header X-Forwarded-Proto $scheme;                # 解决跨域问题                add_header Access-Control-Allow-Origin *;                add_header Access-Control-Allow-Methods &quot;GET, POST, OPTIONS, HEAD, PUT, DELETE&quot;;                add_header Access-Control-Allow-Headers &quot;Origin, X-Requested-With, Content-Type, Accept, Authorization, User-Agent, DNT&quot;;                add_header Access-Control-Max-Age 86400;                            &#125;        &#125;    &#125;&#125;
+
+设计模式
+单例模式
+
+// 单例模式示例代码class Singleton &#123;  constructor() &#123;    if (!Singleton.instance) &#123;      Singleton.instance = this;    &#125;    return Singleton.instance;  &#125;  createInstance() &#123;    const object = &#123; name: &quot;example&quot; &#125;;    return object;  &#125;  getInstance() &#123;    if (!Singleton.instance) &#123;      Singleton.instance = this.createInstance();    &#125;    return Singleton.instance;  &#125;&#125;// 使用示例const instance1 = new Singleton();const instance2 = new Singleton();console.log(instance1 === instance2); // true
+
+
+工厂模式
+
+class Product &#123;  constructor(name) &#123;    this.name = name;  &#125;  getName() &#123;    return this.name;  &#125;&#125;class ProductFactory &#123;  static createProduct(name) &#123;    return new Product(name);  &#125;&#125;// 使用示例const product = ProductFactory.createProduct(&quot;Example Product&quot;);console.log(product.getName()); // &quot;Example Product&quot;
+
+
+观察者模式
+
+class Subject &#123;  constructor() &#123;    this.observers = [];  &#125;  addObserver(observer) &#123;    this.observers.push(observer);  &#125;  removeObserver(observer) &#123;    const index = this.observers.indexOf(observer);    if (index !== -1) &#123;      this.observers.splice(index, 1);    &#125;  &#125;  notify(data) &#123;    this.observers.forEach(observer =&gt; observer.update(data));  &#125;&#125;class Observer &#123;  update(data) &#123;    console.log(`Received data: $&#123;data&#125;`);  &#125;&#125;// 使用示例const subject = new Subject();const observer1 = new Observer();const observer2 = new Observer();subject.addObserver(observer1);subject.addObserver(observer2);subject.notify(&quot;Hello World!&quot;);
+
+
+装饰器模式
+
+interface Component &#123;  operation(): void;&#125;class ConcreteComponent implements Component &#123;  public operation(): void &#123;    console.log(&quot;ConcreteComponent: operation.&quot;);  &#125;&#125;class Decorator implements Component &#123;  protected component: Component;  constructor(component: Component) &#123;    this.component = component;  &#125;  public operation(): void &#123;    console.log(&quot;Decorator: operation.&quot;);    this.component.operation();  &#125;&#125;class ConcreteDecoratorA extends Decorator &#123;  public operation(): void &#123;    super.operation();    console.log(&quot;ConcreteDecoratorA: operation.&quot;);  &#125;&#125;class ConcreteDecoratorB extends Decorator &#123;  public operation(): void &#123;    super.operation();    console.log(&quot;ConcreteDecoratorB: operation.&quot;);  &#125;&#125;// 使用示例const concreteComponent = new ConcreteComponent();const concreteDecoratorA = new ConcreteDecoratorA(concreteComponent);const concreteDecoratorB = new ConcreteDecoratorB(concreteDecoratorA);concreteDecoratorB.operation();
+
+
+代理模式
+
+const target = &#123;  method() &#123;    console.log(&quot;Target method.&quot;);  &#125;&#125;;const proxy = new Proxy(target, &#123;  get(target, prop) &#123;    console.log(`Called $&#123;prop&#125; method.`);    return target[prop];  &#125;&#125;);// 使用示例proxy.method(); // &quot;Called method method. Target method.&quot;
+
+
+适配器模式
+
+class Adaptee &#123;  specificRequest() &#123;    return &quot;适配者中的业务代码被调用&quot;;  &#125;&#125;class Target &#123;  constructor() &#123;    this.adaptee = new Adaptee();  &#125;  request() &#123;    let info = this.adaptee.specificRequest();    return `$&#123;info&#125; - 转换器 - 适配器代码被调用`;  &#125;&#125;// 使用示例let target = new Target();target.request(); // &quot;适配者中的业务代码被调用 - 转换器 - 适配器代码被调用&quot;
+
+
+MVC模式
+
+class Model &#123;  constructor() &#123;    this.data = &#123;      name: &quot;example&quot;,      age: 18,      gender: &quot;male&quot;    &#125;;  &#125;  setData(key, value) &#123;    this.data[key] = value;  &#125;  getData() &#123;    return this.data;  &#125;&#125;class View &#123;  constructor() &#123;    this.container = document.createElement(&quot;div&quot;);  &#125;  render(data) &#123;    const &#123; name, age, gender &#125; = data;    this.container.innerHTML = `      &lt;p&gt;Name: $&#123;name&#125;&lt;/p&gt;      &lt;p&gt;Age: $&#123;age&#125;&lt;/p&gt;      &lt;p&gt;Gender: $&#123;gender&#125;&lt;/p&gt;    `;    document.body.appendChild(this.container);  &#125;&#125;class Controller &#123;  constructor(model, view) &#123;    this.model = model;    this.view = view;    this.view.render(this.model.getData());  &#125;  setData(key, value) &#123;    this.model.setData(key, value);    this.view.render(this.model.getData());  &#125;&#125;// 使用示例const model = new Model();const view = new View();const controller = new Controller(model, view);controller.setData(&quot;age&quot;, 20);]]></content>
+  </entry>
 </search>
