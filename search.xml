@@ -23,7 +23,6 @@ requestAnimationFrame 在 React 中有什么用？
 切换一级分类时，二级分类需要重置
 
 1.2 组件效果演示
-
 1.3 核心技术挑战看似简单的需求，实现起来却遇到了不少挑战：
 
 高度计算问题：如何准确获取内容的完整高度？
@@ -399,16 +398,6 @@ React 18 Working Group
       </tags>
   </entry>
   <entry>
-    <title>【建站日志】Simon成功搬家</title>
-    <url>/2025/06/12/%E3%80%90%E5%BB%BA%E7%AB%99%E6%97%A5%E5%BF%97%E3%80%91Simon%E5%B7%B2%E7%9D%80%E9%99%86/</url>
-    <content><![CDATA[之前用Wordpress建的网站突然炸了T_T，只好搬家到Hexo这边来，虽然之前就想换成ssg静态网站就是了。毕竟Wordpress博客系统上传文章太便秘了，完全用不惯他的文本编辑器，还是MD大法好啊！
-]]></content>
-      <tags>
-        <tag>建站日志</tag>
-        <tag>生活记录</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>【概念解析】前端开发中的polypill</title>
     <url>/2025/07/22/%E3%80%90%E6%A6%82%E5%BF%B5%E8%A7%A3%E6%9E%90%E3%80%91%E5%89%8D%E7%AB%AF%E5%BC%80%E5%8F%91%E4%B8%AD%E7%9A%84Polyfill/</url>
     <content><![CDATA[什么是 Polyfill？Polyfill 是一段代码（通常是 JavaScript），用来为旧浏览器提供它没有原生支持的较新的功能。
@@ -464,6 +453,16 @@ intersection-observer - IntersectionObserver polyfill
       <tags>
         <tag>前端开发</tag>
         <tag>概念解析</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>【建站日志】Simon成功搬家</title>
+    <url>/2025/06/12/%E3%80%90%E5%BB%BA%E7%AB%99%E6%97%A5%E5%BF%97%E3%80%91Simon%E5%B7%B2%E7%9D%80%E9%99%86/</url>
+    <content><![CDATA[之前用Wordpress建的网站突然炸了T_T，只好搬家到Hexo这边来，虽然之前就想换成ssg静态网站就是了。毕竟Wordpress博客系统上传文章太便秘了，完全用不惯他的文本编辑器，还是MD大法好啊！
+]]></content>
+      <tags>
+        <tag>建站日志</tag>
+        <tag>生活记录</tag>
       </tags>
   </entry>
   <entry>
