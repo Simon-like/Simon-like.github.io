@@ -409,6 +409,64 @@ React 18 Working Group
       </tags>
   </entry>
   <entry>
+    <title>【概念解析】前端开发中的polypill</title>
+    <url>/2025/07/22/%E3%80%90%E6%A6%82%E5%BF%B5%E8%A7%A3%E6%9E%90%E3%80%91%E5%89%8D%E7%AB%AF%E5%BC%80%E5%8F%91%E4%B8%AD%E7%9A%84Polyfill/</url>
+    <content><![CDATA[什么是 Polyfill？Polyfill 是一段代码（通常是 JavaScript），用来为旧浏览器提供它没有原生支持的较新的功能。
+名字的由来 🎨“Polyfill” 这个词来源于一种建筑材料 Polyfilla（一种用于填补墙面裂缝的腻子），形象地表示”填补浏览器功能的空缺”。
+为什么需要 Polyfill？// 🌰 例子：旧浏览器不支持 Array.includesconst fruits = [&#x27;apple&#x27;, &#x27;banana&#x27;, &#x27;orange&#x27;];// 新浏览器可以直接使用console.log(fruits.includes(&#x27;banana&#x27;)); // true// 旧浏览器会报错：fruits.includes is not a function
+
+常见的 Polyfill 示例1. Array.includes Polyfill// 检查是否已经存在if (!Array.prototype.includes) &#123;  Array.prototype.includes = function(searchElement, fromIndex) &#123;    // 严格模式    &#x27;use strict&#x27;;        const O = Object(this);    const len = parseInt(O.length) || 0;        if (len === 0) return false;        const n = parseInt(fromIndex) || 0;    let k = Math.max(n &gt;= 0 ? n : len + n, 0);        while (k &lt; len) &#123;      if (searchElement === O[k]) return true;      k++;    &#125;        return false;  &#125;;&#125;
+
+2. Promise Polyfill// 简化版 Promise polyfillif (typeof Promise === &#x27;undefined&#x27;) &#123;  window.Promise = function(executor) &#123;    // Promise 实现代码...  &#125;;&#125;
+
+3. Object.assign Polyfillif (!Object.assign) &#123;  Object.assign = function(target) &#123;    &#x27;use strict&#x27;;        if (target == null) &#123;      throw new TypeError(&#x27;Cannot convert undefined or null to object&#x27;);    &#125;        const output = Object(target);        for (let index = 1; index &lt; arguments.length; index++) &#123;      const source = arguments[index];      if (source != null) &#123;        for (const key in source) &#123;          if (Object.prototype.hasOwnProperty.call(source, key)) &#123;            output[key] = source[key];          &#125;        &#125;      &#125;    &#125;        return output;  &#125;;&#125;
+
+4. String.padStart Polyfillif (!String.prototype.padStart) &#123;  String.prototype.padStart = function(targetLength, padString) &#123;    targetLength = targetLength &gt;&gt; 0; // 转为整数    padString = String(padString || &#x27; &#x27;);        if (this.length &gt;= targetLength) &#123;      return String(this);    &#125;        targetLength = targetLength - this.length;    if (targetLength &gt; padString.length) &#123;      padString += padString.repeat(targetLength / padString.length);    &#125;        return padString.slice(0, targetLength) + String(this);  &#125;;&#125;
+
+Polyfill vs 其他概念1. Polyfill vs Transpile（转译）// Polyfill：运行时补充缺失的 APIArray.prototype.find = Array.prototype.find || function() &#123; /* ... */ &#125;;// Transpile：编译时转换语法（如 Babel）// ES6 箭头函数const add = (a, b) =&gt; a + b;// 转译后var add = function(a, b) &#123; return a + b; &#125;;
+
+2. Polyfill vs Shim
+Polyfill：实现标准 API，行为与规范一致
+Shim：可能有自己的 API，不一定遵循标准
+
+如何使用 Polyfill？1. 手动引入&lt;!-- 引入特定的 polyfill --&gt;&lt;script src=&quot;https://polyfill.io/v3/polyfill.min.js?features=Promise,Array.from&quot;&gt;&lt;/script&gt;
+
+2. 使用 core-js// 安装npm install core-js// 使用import &#x27;core-js/features/array/includes&#x27;;import &#x27;core-js/features/promise&#x27;;
+
+3. 使用 @babel&#x2F;polyfill（已废弃）// 新的推荐方式npm install core-js regenerator-runtime// babel.config.jsmodule.exports = &#123;  presets: [    [&#x27;@babel/preset-env&#x27;, &#123;      useBuiltIns: &#x27;usage&#x27;,      corejs: 3    &#125;]  ]&#125;;
+
+最佳实践1. 按需加载// 只在需要时加载 polyfillif (!window.Promise) &#123;  // 动态加载 Promise polyfill  loadScript(&#x27;promise-polyfill.js&#x27;);&#125;
+
+2. 使用 polyfill.io 服务&lt;!-- 根据用户浏览器自动返回需要的 polyfill --&gt;&lt;script src=&quot;https://polyfill.io/v3/polyfill.min.js&quot;&gt;&lt;/script&gt;
+
+3. 特性检测// 使用特性检测而不是浏览器检测function loadPolyfills() &#123;  const polyfills = [];    if (!window.Promise) &#123;    polyfills.push(import(&#x27;promise-polyfill&#x27;));  &#125;    if (!Array.prototype.includes) &#123;    polyfills.push(import(&#x27;array-includes-polyfill&#x27;));  &#125;    return Promise.all(polyfills);&#125;// 加载完 polyfill 后再启动应用loadPolyfills().then(() =&gt; &#123;  // 启动应用  startApp();&#125;);
+
+常用的 Polyfill 库
+core-js - 最全面的 polyfill 库
+polyfill.io - 自动化 polyfill 服务
+es5-shim&#x2F;es6-shim - ES5&#x2F;ES6 polyfill
+fetch-polyfill - Fetch API polyfill
+intersection-observer - IntersectionObserver polyfill
+
+注意事项 ⚠️
+性能影响：Polyfill 会增加代码体积
+选择性加载：只加载需要的 polyfill
+版本兼容：确保 polyfill 支持目标浏览器
+原生优先：优先使用原生实现
+
+// 好的做法：先检测再添加if (!Array.prototype.flat) &#123;  // 添加 polyfill&#125;// 避免：直接覆盖Array.prototype.flat = function() &#123; /* ... */ &#125;;
+
+总之，Polyfill 是前端开发中实现向后兼容的重要手段，让我们能够在旧浏览器中使用新特性！
+]]></content>
+      <categories>
+        <category>前端知识小册</category>
+      </categories>
+      <tags>
+        <tag>前端开发</tag>
+        <tag>概念解析</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>【秋招备战】计算机网络</title>
     <url>/2025/07/22/%E3%80%90%E7%A7%8B%E6%8B%9B%E5%A4%87%E6%88%98%E3%80%91%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/</url>
     <content><![CDATA[前言计算机网络作为前端开发中绕不开的基础知识，面试时也特爱问，很多时候都有可能被打一个冷不防。这份文档旨在整理前端面试中高频出现的计算机网络知识点，希望能帮助到正在准备面试的你。
@@ -507,64 +565,6 @@ SQL 注入
         <tag>计算机网络</tag>
         <tag>秋招</tag>
         <tag>面试八股文</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>【概念解析】前端开发中的polypill</title>
-    <url>/2025/07/22/%E3%80%90%E6%A6%82%E5%BF%B5%E8%A7%A3%E6%9E%90%E3%80%91%E5%89%8D%E7%AB%AF%E5%BC%80%E5%8F%91%E4%B8%AD%E7%9A%84Polyfill/</url>
-    <content><![CDATA[什么是 Polyfill？Polyfill 是一段代码（通常是 JavaScript），用来为旧浏览器提供它没有原生支持的较新的功能。
-名字的由来 🎨“Polyfill” 这个词来源于一种建筑材料 Polyfilla（一种用于填补墙面裂缝的腻子），形象地表示”填补浏览器功能的空缺”。
-为什么需要 Polyfill？// 🌰 例子：旧浏览器不支持 Array.includesconst fruits = [&#x27;apple&#x27;, &#x27;banana&#x27;, &#x27;orange&#x27;];// 新浏览器可以直接使用console.log(fruits.includes(&#x27;banana&#x27;)); // true// 旧浏览器会报错：fruits.includes is not a function
-
-常见的 Polyfill 示例1. Array.includes Polyfill// 检查是否已经存在if (!Array.prototype.includes) &#123;  Array.prototype.includes = function(searchElement, fromIndex) &#123;    // 严格模式    &#x27;use strict&#x27;;        const O = Object(this);    const len = parseInt(O.length) || 0;        if (len === 0) return false;        const n = parseInt(fromIndex) || 0;    let k = Math.max(n &gt;= 0 ? n : len + n, 0);        while (k &lt; len) &#123;      if (searchElement === O[k]) return true;      k++;    &#125;        return false;  &#125;;&#125;
-
-2. Promise Polyfill// 简化版 Promise polyfillif (typeof Promise === &#x27;undefined&#x27;) &#123;  window.Promise = function(executor) &#123;    // Promise 实现代码...  &#125;;&#125;
-
-3. Object.assign Polyfillif (!Object.assign) &#123;  Object.assign = function(target) &#123;    &#x27;use strict&#x27;;        if (target == null) &#123;      throw new TypeError(&#x27;Cannot convert undefined or null to object&#x27;);    &#125;        const output = Object(target);        for (let index = 1; index &lt; arguments.length; index++) &#123;      const source = arguments[index];      if (source != null) &#123;        for (const key in source) &#123;          if (Object.prototype.hasOwnProperty.call(source, key)) &#123;            output[key] = source[key];          &#125;        &#125;      &#125;    &#125;        return output;  &#125;;&#125;
-
-4. String.padStart Polyfillif (!String.prototype.padStart) &#123;  String.prototype.padStart = function(targetLength, padString) &#123;    targetLength = targetLength &gt;&gt; 0; // 转为整数    padString = String(padString || &#x27; &#x27;);        if (this.length &gt;= targetLength) &#123;      return String(this);    &#125;        targetLength = targetLength - this.length;    if (targetLength &gt; padString.length) &#123;      padString += padString.repeat(targetLength / padString.length);    &#125;        return padString.slice(0, targetLength) + String(this);  &#125;;&#125;
-
-Polyfill vs 其他概念1. Polyfill vs Transpile（转译）// Polyfill：运行时补充缺失的 APIArray.prototype.find = Array.prototype.find || function() &#123; /* ... */ &#125;;// Transpile：编译时转换语法（如 Babel）// ES6 箭头函数const add = (a, b) =&gt; a + b;// 转译后var add = function(a, b) &#123; return a + b; &#125;;
-
-2. Polyfill vs Shim
-Polyfill：实现标准 API，行为与规范一致
-Shim：可能有自己的 API，不一定遵循标准
-
-如何使用 Polyfill？1. 手动引入&lt;!-- 引入特定的 polyfill --&gt;&lt;script src=&quot;https://polyfill.io/v3/polyfill.min.js?features=Promise,Array.from&quot;&gt;&lt;/script&gt;
-
-2. 使用 core-js// 安装npm install core-js// 使用import &#x27;core-js/features/array/includes&#x27;;import &#x27;core-js/features/promise&#x27;;
-
-3. 使用 @babel&#x2F;polyfill（已废弃）// 新的推荐方式npm install core-js regenerator-runtime// babel.config.jsmodule.exports = &#123;  presets: [    [&#x27;@babel/preset-env&#x27;, &#123;      useBuiltIns: &#x27;usage&#x27;,      corejs: 3    &#125;]  ]&#125;;
-
-最佳实践1. 按需加载// 只在需要时加载 polyfillif (!window.Promise) &#123;  // 动态加载 Promise polyfill  loadScript(&#x27;promise-polyfill.js&#x27;);&#125;
-
-2. 使用 polyfill.io 服务&lt;!-- 根据用户浏览器自动返回需要的 polyfill --&gt;&lt;script src=&quot;https://polyfill.io/v3/polyfill.min.js&quot;&gt;&lt;/script&gt;
-
-3. 特性检测// 使用特性检测而不是浏览器检测function loadPolyfills() &#123;  const polyfills = [];    if (!window.Promise) &#123;    polyfills.push(import(&#x27;promise-polyfill&#x27;));  &#125;    if (!Array.prototype.includes) &#123;    polyfills.push(import(&#x27;array-includes-polyfill&#x27;));  &#125;    return Promise.all(polyfills);&#125;// 加载完 polyfill 后再启动应用loadPolyfills().then(() =&gt; &#123;  // 启动应用  startApp();&#125;);
-
-常用的 Polyfill 库
-core-js - 最全面的 polyfill 库
-polyfill.io - 自动化 polyfill 服务
-es5-shim&#x2F;es6-shim - ES5&#x2F;ES6 polyfill
-fetch-polyfill - Fetch API polyfill
-intersection-observer - IntersectionObserver polyfill
-
-注意事项 ⚠️
-性能影响：Polyfill 会增加代码体积
-选择性加载：只加载需要的 polyfill
-版本兼容：确保 polyfill 支持目标浏览器
-原生优先：优先使用原生实现
-
-// 好的做法：先检测再添加if (!Array.prototype.flat) &#123;  // 添加 polyfill&#125;// 避免：直接覆盖Array.prototype.flat = function() &#123; /* ... */ &#125;;
-
-总之，Polyfill 是前端开发中实现向后兼容的重要手段，让我们能够在旧浏览器中使用新特性！
-]]></content>
-      <categories>
-        <category>前端知识小册</category>
-      </categories>
-      <tags>
-        <tag>前端开发</tag>
-        <tag>概念解析</tag>
       </tags>
   </entry>
   <entry>
