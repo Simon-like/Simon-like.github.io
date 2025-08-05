@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="Simon">
+    
+    <meta name="author" content="Simon">
+    
+    <!-- Completely eliminate flash of wrong theme -->
+    <script>
+        (function() {
+            const THEME_KEY = "REDEFINE-THEME-STATUS";
+            const DARK = "dark", LIGHT = "light";
+            
+            // Get preferred theme
+            function getTheme() {
+                try {
+                    const saved = localStorage.getItem(THEME_KEY);
+                    if (saved) {
+                        const { isDark } = JSON.parse(saved);
+                        return isDark ? DARK : LIGHT;
+                    }
+                } catch (e) {}
+                
+                return matchMedia("(prefers-color-scheme: dark)").matches ? DARK : LIGHT;
+            }
+            
+            // Apply theme to document
+            function applyTheme(theme) {
+                const isDark = theme === DARK;
+                const root = document.documentElement;
+                
+                // Set data attribute for CSS variables
+                root.setAttribute("data-theme", theme);
+                
+                // Set classes for compatibility
+                root.classList.add(theme);
+                root.classList.remove(isDark ? LIGHT : DARK);
+                root.style.colorScheme = theme;
+            }
+            
+            // Initial application
+            const theme = getTheme();
+            applyTheme(theme);
+            
+            // Listen for system preference changes
+            matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
+                // Only update if using system preference (no localStorage entry)
+                if (!localStorage.getItem(THEME_KEY)) {
+                    applyTheme(matches ? DARK : LIGHT);
+                }
+            });
+            
+            // Set body classes once DOM is ready
+            if (document.readyState !== "loading") {
+                document.body.classList.add(theme + "-mode");
+            } else {
+                document.addEventListener("DOMContentLoaded", () => {
+                    document.body.classList.add(theme + "-mode");
+                    document.body.classList.remove((theme === DARK ? LIGHT : DARK) + "-mode");
+                });
+            }
+        })();
+    </script>
+    
+    <!-- Critical CSS to prevent flash -->
+    <style>
+        :root[data-theme="dark"] {
+            --background-color: #202124;
+            --background-color-transparent: rgba(32, 33, 36, 0.6);
+            --second-background-color: #2d2e32;
+            --third-background-color: #34353a;
+            --third-background-color-transparent: rgba(32, 33, 36, 0.6);
+            --primary-color: #0066CC;
+            --first-text-color: #ffffff;
+            --second-text-color: #eeeeee;
+            --third-text-color: #bebec6;
+            --fourth-text-color: #999999;
+            --default-text-color: #bebec6;
+            --invert-text-color: #373D3F;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --selection-color: #0066CC;
+            --shadow-color-1: rgba(255, 255, 255, 0.08);
+            --shadow-color-2: rgba(255, 255, 255, 0.05);
+        }
+        
+        :root[data-theme="light"] {
+            --background-color: #fff;
+            --background-color-transparent: rgba(255, 255, 255, 0.6);
+            --second-background-color: #f8f8f8;
+            --third-background-color: #f2f2f2;
+            --third-background-color-transparent: rgba(241, 241, 241, 0.6);
+            --primary-color: #0066CC;
+            --first-text-color: #16171a;
+            --second-text-color: #2f3037;
+            --third-text-color: #5e5e5e;
+            --fourth-text-color: #eeeeee;
+            --default-text-color: #373D3F;
+            --invert-text-color: #bebec6;
+            --border-color: rgba(0, 0, 0, 0.08);
+            --selection-color: #0066CC;
+            --shadow-color-1: rgba(0, 0, 0, 0.08);
+            --shadow-color-2: rgba(0, 0, 0, 0.05);
+        }
+        
+        body {
+            background-color: var(--background-color);
+            color: var(--default-text-color);
+        }
+        
+        /* Apply body classes as soon as DOM is ready */
+        :root[data-theme="dark"] body {
+            background-color: var(--background-color);
+            color: var(--default-text-color);
+        }
+    </style>
+    
+    <!-- preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    
+        
+        
+        
+            <link rel="preconnect" href="https://evan.beee.top" crossorigin>
+        
+    
+    <!--- Seo Part-->
+    
+    <link rel="canonical" href="http://example.com/2025/08/05/【秋招备战】javascript 集合类型深度解析/"/>
+    <meta name="robots" content="index,follow">
+    <meta name="googlebot" content="index,follow">
+    <meta name="revisit-after" content="1 days">
+    
+    
+    
+        
+        <meta name="description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【秋招备战】JavaScript 集合类型深度解析">
+<meta property="og:url" content="http://example.com/2025/08/05/%E3%80%90%E7%A7%8B%E6%8B%9B%E5%A4%87%E6%88%98%E3%80%91JavaScript%20%E9%9B%86%E5%90%88%E7%B1%BB%E5%9E%8B%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/index.html">
+<meta property="og:site_name" content="Simon感觉有点奇怪">
+<meta property="og:description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/redefine-og.webp">
+<meta property="article:published_time" content="2025-08-05T10:03:46.000Z">
+<meta property="article:modified_time" content="2025-08-05T10:07:33.321Z">
+<meta property="article:author" content="Simon">
+<meta property="article:tag" content="秋招">
+<meta property="article:tag" content="ES">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/redefine-og.webp">
+    
+    
+    <!--- Icon Part-->
+    <link rel="icon" type="image/png" href="/medias/simon_ico.svg" sizes="192x192">
+    <link rel="apple-touch-icon" sizes="180x180" href="/medias/simon_ico.svg">
+    <meta name="theme-color" content="#A31F34">
+    <link rel="shortcut icon" href="/medias/simon_ico.svg">
+    <!--- Page Info-->
+    
+    <title>
+        
+            【秋招备战】JavaScript 集合类型深度解析 | Simon觉得好奇怪
+        
+    </title>
+
+    <link rel="stylesheet" href="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/fonts/Chillax/chillax.css">
+
+    <!--- Inject Part-->
+    
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+        <link rel="stylesheet" href="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/css/build/tailwind.css">
+    
+
+    <link rel="stylesheet" href="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/fonts/GeistMono/geist-mono.css">
+    <link rel="stylesheet" href="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/fonts/Geist/geist.css">
+    <!--- Font Part-->
+    
+    
+    
+    
+    
+    
+        <script  src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/libs/anime.min.js" ></script>
+    
+
+    <script id="hexo-configurations">
+    window.config = {"hostname":"example.com","root":"/","language":"zh-CN","path":"search.json"};
+    window.theme = {"articles":{"style":{"font_size":"16px","line_height":1.5,"image_border_radius":"14px","image_alignment":"center","image_caption":false,"link_icon":true,"delete_mask":false,"title_alignment":"left","headings_top_spacing":{"h1":"3.2rem","h2":"2.4rem","h3":"1.9rem","h4":"1.6rem","h5":"1.4rem","h6":"1.3rem"}},"word_count":{"enable":true,"count":true,"min2read":true},"author_label":{"enable":true,"auto":false,"list":[]},"code_block":{"copy":true,"style":"mac","highlight_theme":{"light":"github","dark":"vs2015"},"font":{"enable":false,"family":null,"url":null}},"toc":{"enable":true,"max_depth":3,"number":false,"expand":true,"init_open":true},"copyright":{"enable":true,"default":"cc_by_nc_sa"},"lazyload":true,"pangu_js":false,"recommendation":{"enable":true,"title":"推荐阅读","limit":3,"mobile_limit":2,"placeholder":"/images/wallhaven-wqery6-light.webp","skip_dirs":[]}},"colors":{"primary":"#A31F34","secondary":null,"default_mode":"light"},"global":{"fonts":{"chinese":{"enable":false,"family":null,"url":null},"english":{"enable":false,"family":null,"url":null},"title":{"enable":false,"family":null,"url":null}},"content_max_width":"1000px","sidebar_width":"210px","hover":{"shadow":true,"scale":false},"scroll_progress":{"bar":true,"percentage":true},"website_counter":{"url":"https://cn.vercount.one/js","enable":true,"site_pv":true,"site_uv":true,"post_pv":true},"single_page":true,"preloader":{"enable":true,"custom_message":"陌上人如玉，公子世无双"},"side_tools":{"gear_rotation":true,"auto_expand":false},"open_graph":{"enable":true,"image":"/images/redefine-og.webp","description":"Hexo Theme Redefine, Redefine Your Hexo Journey."},"google_analytics":{"enable":false,"id":null}},"home_banner":{"enable":true,"style":"fixed","image":{"light":"/images/wallhaven-wqery6-light.webp","dark":"/images/wallhaven-wqery6-dark.webp"},"title":"Simon的展开领域","subtitle":{"text":["陌上人如玉，公子世无双","泥泞过后，渐闻花香"],"hitokoto":{"enable":false,"show_author":false,"api":"https://v1.hitokoto.cn"},"typing_speed":100,"backing_speed":80,"starting_delay":500,"backing_delay":1500,"loop":true,"smart_backspace":true},"text_color":{"light":"#fff","dark":"#d1d1b6"},"text_style":{"title_size":"2.8rem","subtitle_size":"1.5rem","line_height":1.2},"custom_font":{"enable":false,"family":null,"url":null},"social_links":{"enable":false,"style":"default","links":{"github":null,"instagram":null,"zhihu":null,"twitter":null,"email":null},"qrs":{"weixin":null}}},"plugins":{"feed":{"enable":false},"aplayer":{"enable":false,"type":"fixed","audios":[{"name":null,"artist":null,"url":null,"cover":null,"lrc":null}]},"mermaid":{"enable":true,"version":"11.4.1"}},"version":"2.8.5","navbar":{"auto_hide":true,"color":{"left":"#f78736","right":"#367df7","transparency":35},"width":{"home":"1200px","pages":"1000px"},"links":{"Home":{"path":"/","icon":"fa-regular fa-house"},"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Categories":{"icon":"fa-solid fa-folder","path":"/categories/"},"Tags":{"icon":"fa-solid fa-tags","path":"/tags/"},"About":{"icon":"fa-regular fa-user","submenus":{"Me":"/about","Github":"https://github.com/Simon-like","Friends":"/friends"}}},"search":{"enable":true,"preload":true}},"page_templates":{"friends_column":2,"tags_style":"blur"},"home":{"sidebar":{"enable":true,"position":"left","first_item":"menu","announcement":null,"show_on_mobile":true,"links":{"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"}}},"article_date_format":"auto","excerpt_length":200,"categories":{"enable":true,"limit":3},"tags":{"enable":true,"limit":3}},"footerStart":"2025/6/18 12:00:00"};
+    window.lang_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"};
+    window.data = {"masonry":false};
+  </script>
+    
+    <!--- Fontawesome Part-->
+    <link rel="stylesheet" href="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/fontawesome/fontawesome.min.css">
+    <link rel="stylesheet" href="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/fontawesome/brands.min.css">
+    <link rel="stylesheet" href="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/fontawesome/solid.min.css">
+    <link rel="stylesheet" href="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/fontawesome/regular.min.css">
+    
+    
+    
+    
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+
+<body>
+	<div class="progress-bar-container">
+	
+	<span class="scroll-progress-bar"></span>
+	
+
+	
+	<span class="pjax-progress-bar"></span>
+	<!--        <span class="swup-progress-icon">-->
+	<!--            <i class="fa-solid fa-circle-notch fa-spin"></i>-->
+	<!--        </span>-->
+	
+</div>
+
+<style>
+    :root {
+        --preloader-background-color: #fff;
+        --preloader-text-color: #000;
+    }
+
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --preloader-background-color: #202124;
+            --preloader-text-color: #fff;
+        }
+    }
+
+    @media (prefers-color-scheme: light) {
+        :root {
+            --preloader-background-color: #fff;
+            --preloader-text-color: #000;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .ml13 {
+            font-size: 2.6rem !important; /* Adjust this value as needed */
+        }
+    }
+
+    .preloader {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem; /* Tailwind 'gap-4' is 1rem */
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        padding: 12px;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh; /* 'h-screen' is 100% of the viewport height */
+        background-color: var(--preloader-background-color);
+        z-index: 1100; /* 'z-[1100]' sets the z-index */
+        transition: opacity 0.2s ease-in-out;
+    }
+
+    .ml13 {
+        font-size: 3.2rem;
+        /* text-transform: uppercase; */
+        color: var(--preloader-text-color);
+        letter-spacing: -1px;
+        font-weight: 500;
+        font-family: 'Chillax-Variable', sans-serif;
+        text-align: center;
+    }
+
+    .ml13 .word {
+        display: inline-flex;
+        flex-wrap: wrap;
+        white-space: nowrap;
+    }
+
+    .ml13 .letter {
+        display: inline-block;
+        line-height: 1em;
+    }
+</style>
+
+<div class="preloader">
+    <h2 class="ml13">
+        陌上人如玉，公子世无双
+    </h2>
+    <script>
+        var textWrapper = document.querySelector('.ml13');
+        // Split text into words
+        var words = textWrapper.textContent.trim().split(' ');
+
+        // Clear the existing content
+        textWrapper.innerHTML = '';
+
+        // Wrap each word and its letters in spans
+        words.forEach(function(word) {
+            var wordSpan = document.createElement('span');
+            wordSpan.classList.add('word');
+            wordSpan.innerHTML = word.replace(/\S/g, "<span class='letter'>$&</span>");
+            textWrapper.appendChild(wordSpan);
+            textWrapper.appendChild(document.createTextNode(' ')); // Add space between words
+        });
+
+        var animation = anime.timeline({ loop: true })
+            .add({
+                targets: '.ml13 .letter',
+                translateY: [20, 0],
+                translateZ: 0,
+                opacity: [0, 1],
+                filter: ['blur(5px)', 'blur(0px)'],
+                easing: "easeOutExpo",
+                duration: 1200,
+                delay: (el, i) => 300 + 20 * i,
+            })
+            .add({
+                targets: '.ml13 .letter',
+                translateY: [0, -20],
+                opacity: [1, 0],
+                filter: ['blur(0px)', 'blur(5px)'],
+                easing: "easeInExpo",
+                duration: 1000,
+                delay: (el, i) => 15 * i,
+                complete: function() {
+                    hidePreloader();
+                }
+            }, '-=700');
+
+
+        let themeStatus = JSON.parse(localStorage.getItem('REDEFINE-THEME-STATUS'))?.isDark;
+
+        // If the theme status is not found in local storage, check the preferred color scheme
+        if (themeStatus === undefined || themeStatus === null) {
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                themeStatus = 'dark';
+            } else {
+                themeStatus = 'light';
+            }
+        }
+
+        // Now you can use the themeStatus variable in your code
+        if (themeStatus) {
+            document.documentElement.style.setProperty('--preloader-background-color', '#202124');
+            document.documentElement.style.setProperty('--preloader-text-color', '#fff');
+        } else {
+            document.documentElement.style.setProperty('--preloader-background-color', '#fff');
+            document.documentElement.style.setProperty('--preloader-text-color', '#000');
+        }
+
+        window.addEventListener('load', function () {
+            setTimeout(hidePreloader, 5000); // Call hidePreloader after 5000 milliseconds if not already called by animation
+        });
+
+        function hidePreloader() {
+            var preloader = document.querySelector('.preloader');
+            preloader.style.opacity = '0';
+            setTimeout(function () {
+                preloader.style.display = 'none';
+            }, 200);
+        }
+    </script>
+</div>
+
+<main class="page-container" id="swup">
+
+	
+
+	<div class="main-content-container flex flex-col justify-between min-h-dvh">
+		<div class="main-content-header">
+			<header class="navbar-container px-6 md:px-12">
+    <div class="navbar-content transition-navbar ">
+        <div class="left">
+            
+                <a class="logo-image h-8 w-8 sm:w-10 sm:h-10 mr-3" href="/">
+                    <img src="/medias/fufu_seek.png" class="w-full h-full rounded-xs">
+                </a>
+            
+            <a class="logo-title" href="/">
+                
+                Simon觉得好奇怪
+                
+            </a>
+        </div>
+
+        <div class="right">
+            <!-- PC -->
+            <div class="desktop">
+                <ul class="navbar-list">
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/"
+                                        >
+                                    <i class="fa-regular fa-house fa-fw"></i>
+                                    首页
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/archives"
+                                        >
+                                    <i class="fa-regular fa-archive fa-fw"></i>
+                                    归档
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/categories/"
+                                        >
+                                    <i class="fa-solid fa-folder fa-fw"></i>
+                                    分类
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/tags/"
+                                        >
+                                    <i class="fa-solid fa-tags fa-fw"></i>
+                                    标签
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class="has-dropdown"
+                                   href="#"
+                                        onClick=&#34;return false;&#34;>
+                                    <i class="fa-regular fa-user fa-fw"></i>
+                                    关于
+                                    <i class="fa-solid fa-chevron-down fa-fw"></i>
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                                    <ul class="sub-menu">
+                                        
+                                            <li>
+                                                <a href="/about">
+                                                    ME
+                                                </a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a target="_blank" rel="noopener" href="https://github.com/Simon-like">
+                                                    GITHUB
+                                                </a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="/friends">
+                                                    友情链接
+                                                </a>
+                                            </li>
+                                        
+                                    </ul>
+                                
+                            </li>
+                    
+                    
+                        <li class="navbar-item search search-popup-trigger">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <!-- Mobile -->
+            <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                
+                <div class="icon-item navbar-bar">
+                    <div class="navbar-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile sheet -->
+    <div class="navbar-drawer h-dvh w-full absolute top-0 left-0 bg-background-color flex flex-col justify-between">
+        <ul class="drawer-navbar-list flex flex-col px-4 justify-center items-start">
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/"
+                        >
+                            <span>
+                                首页
+                            </span>
+                            
+                                <i class="fa-regular fa-house fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/archives"
+                        >
+                            <span>
+                                归档
+                            </span>
+                            
+                                <i class="fa-regular fa-archive fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/categories/"
+                        >
+                            <span>
+                                分类
+                            </span>
+                            
+                                <i class="fa-solid fa-folder fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/tags/"
+                        >
+                            <span>
+                                标签
+                            </span>
+                            
+                                <i class="fa-solid fa-tags fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item-sub text-base my-1.5 flex flex-col w-full">
+                        
+                        <div class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary cursor-pointer text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                             navbar-data-toggle="submenu-About"
+                        >
+                            <span>
+                                关于
+                            </span>
+                            
+                                <i class="fa-solid fa-chevron-right fa-sm fa-fw transition-all"></i>
+                            
+                        </div>
+                        
+
+                        
+                            <div class="flex-col items-start px-2 py-2 hidden" data-target="submenu-About">
+                                
+                                    <div class="drawer-navbar-item text-base flex flex-col justify-center items-start hover:underline active:underline hover:underline-offset-1 rounded-3xl">
+                                        <a class=" text-third-text-color text-xl"
+                                           href="/about">ME</a>
+                                    </div>
+                                
+                                    <div class="drawer-navbar-item text-base flex flex-col justify-center items-start hover:underline active:underline hover:underline-offset-1 rounded-3xl">
+                                        <a class=" text-third-text-color text-xl"
+                                           target="_blank" rel="noopener" href="https://github.com/Simon-like">GITHUB</a>
+                                    </div>
+                                
+                                    <div class="drawer-navbar-item text-base flex flex-col justify-center items-start hover:underline active:underline hover:underline-offset-1 rounded-3xl">
+                                        <a class=" text-third-text-color text-xl"
+                                           href="/friends">友情链接</a>
+                                    </div>
+                                
+                            </div>
+                        
+                    </li>
+            
+
+            
+            
+                
+                    
+                    
+                    
+            
+        </ul>
+
+        <div class="statistics flex justify-around my-2.5">
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/tags">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">13</div>
+        <div class="label text-third-text-color text-sm">标签</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/categories">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">3</div>
+        <div class="label text-third-text-color text-sm">分类</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">6</div>
+        <div class="label text-third-text-color text-sm">文章</div>
+    </a>
+</div>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+		</div>
+
+		<div class="main-content-body transition-fade-up">
+			
+
+			<div class="main-content">
+				<div class="post-page-container flex relative justify-between box-border w-full h-full">
+	<div class="article-content-container">
+
+		<div class="article-title relative w-full">
+			
+			
+			
+			<img src="/medias/shuishui.jpg" alt="【秋招备战】JavaScript 集合类型深度解析" class="w-full h-60 sm:h-72 md:h-80 object-cover sm:rounded-t-large dark:brightness-75" />
+			
+			<div class="w-full flex items-center absolute bottom-0 justify-start">
+				<h1 class="article-title-cover text-center mx-6 my-6 text-second-text-color bg-background-color-transparent px-4 py-3 text-3xl sm:text-4xl md:text-5xl font-semibold backdrop-blur-lg rounded-xl border border-border-color ">【秋招备战】JavaScript 集合类型深度解析</h1>
+			</div>
+			
+		</div>
+
+		
+		<div class="article-header flex flex-row gap-2 items-center px-2 sm:px-6 md:px-8">
+			<div class="avatar w-[46px] h-[46px] flex-shrink-0 rounded-medium border border-border-color p-[1px]">
+				<img src="/medias/fufu_seek.png">
+			</div>
+			<div class="info flex flex-col justify-between">
+				<div class="author flex items-center">
+					<span class="name text-default-text-color text-lg font-semibold">Simon</span>
+					
+					<span class="author-label ml-1.5 text-xs px-2 py-0.5 rounded-small text-third-text-color border border-shadow-color-1">Lv1</span>
+					
+				</div>
+				<div class="meta-info">
+					<div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fa-regular fa-pen-fancy"></i>&nbsp;
+        <span class="desktop">2025-08-05 18:03:46</span>
+        <span class="mobile">2025-08-05 18:03:46</span>
+        <span class="hover-info">创建</span>
+    </span>
+    
+        <span class="article-date article-meta-item">
+            <i class="fa-regular fa-wrench"></i>&nbsp;
+            <span class="desktop">2025-08-05 18:07:33</span>
+            <span class="mobile">2025-08-05 18:07:33</span>
+            <span class="hover-info">更新</span>
+        </span>
+    
+
+    
+        <span class="article-categories article-meta-item">
+            <i class="fa-regular fa-folders"></i>&nbsp;
+            <ul>
+                
+                
+                    
+                        
+                        <li>
+                            <a href="/categories/%E7%A7%8B%E6%8B%9B%E5%87%86%E5%A4%87/">秋招准备</a>&nbsp;
+                        </li>
+                    
+                    
+                
+            </ul>
+        </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fa-regular fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/%E7%A7%8B%E6%8B%9B/">秋招</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/ES/">ES</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+    
+    
+        <span class="article-pv article-meta-item">
+            <i class="fa-regular fa-eye"></i>&nbsp;<span id="busuanzi_value_page_pv"></span>
+        </span>
+    
+</div>
+
+				</div>
+			</div>
+		</div>
+		
+
+		
+
+
+		<div class="article-content markdown-body px-2 sm:px-6 md:px-8 pb-8">
+			<p>在 JavaScript 的世界里，除了我们熟悉的对象（Object）和数组（Array），ES6 还引入了四种新的集合类型：Map、Set、WeakMap 和 WeakSet。这些数据结构不仅丰富了我们的工具箱，更是在现代前端框架的底层实现中扮演着重要角色。今天，让我们深入探讨这些集合类型的特性、使用场景，以及它们在 React 和 Vue 源码中的精妙应用。</p>
+<h2 id="一、Map：更强大的键值对集合"><a href="#一、Map：更强大的键值对集合" class="headerlink" title="一、Map：更强大的键值对集合"></a>一、Map：更强大的键值对集合</h2><h3 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h3><p>Map 是一个键值对的集合，与普通对象最大的区别在于：<strong>Map 的键可以是任意类型</strong>，而不仅仅是字符串或 Symbol。</p>
+<div class="code-container" data-rel="Javascript"><figure class="iseeu highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">const</span> map = <span class="keyword">new</span> <span class="title class_">Map</span>();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 基本用法</span></span><br><span class="line">map.<span class="title function_">set</span>(<span class="string">&#x27;name&#x27;</span>, <span class="string">&#x27;JavaScript&#x27;</span>);</span><br><span class="line">map.<span class="title function_">set</span>(<span class="number">42</span>, <span class="string">&#x27;The Answer&#x27;</span>);</span><br><span class="line">map.<span class="title function_">set</span>(<span class="literal">true</span>, <span class="string">&#x27;Boolean key&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 对象作为键</span></span><br><span class="line"><span class="keyword">const</span> objKey = &#123; <span class="attr">id</span>: <span class="number">1</span> &#125;;</span><br><span class="line">map.<span class="title function_">set</span>(objKey, <span class="string">&#x27;Object as key&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 函数作为键</span></span><br><span class="line"><span class="keyword">const</span> <span class="title function_">funcKey</span> = (<span class="params"></span>) =&gt; &#123;&#125;;</span><br><span class="line">map.<span class="title function_">set</span>(funcKey, <span class="string">&#x27;Function as key&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(map.<span class="title function_">get</span>(objKey)); <span class="comment">// &#x27;Object as key&#x27;</span></span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(map.<span class="property">size</span>); <span class="comment">// 5</span></span><br></pre></td></tr></table></figure></div>
+
+<h3 id="Map-的核心特性"><a href="#Map-的核心特性" class="headerlink" title="Map 的核心特性"></a>Map 的核心特性</h3><ol>
+<li><strong>键的唯一性</strong>：Map 中的键是唯一的，重复设置会覆盖之前的值</li>
+<li><strong>保持插入顺序</strong>：Map 会记住键值对的插入顺序</li>
+<li><strong>可迭代</strong>：Map 实现了迭代器协议</li>
+</ol>
+<div class="code-container" data-rel="Javascript"><figure class="iseeu highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">const</span> map = <span class="keyword">new</span> <span class="title class_">Map</span>([</span><br><span class="line">  [<span class="string">&#x27;first&#x27;</span>, <span class="number">1</span>],</span><br><span class="line">  [<span class="string">&#x27;second&#x27;</span>, <span class="number">2</span>],</span><br><span class="line">  [<span class="string">&#x27;third&#x27;</span>, <span class="number">3</span>]</span><br><span class="line">]);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 遍历方法</span></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">const</span> [key, value] <span class="keyword">of</span> map) &#123;</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">`<span class="subst">$&#123;key&#125;</span>: <span class="subst">$&#123;value&#125;</span>`</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 获取所有键</span></span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>([...map.<span class="title function_">keys</span>()]); <span class="comment">// [&#x27;first&#x27;, &#x27;second&#x27;, &#x27;third&#x27;]</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 获取所有值</span></span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>([...map.<span class="title function_">values</span>()]); <span class="comment">// [1, 2, 3]</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 获取所有键值对</span></span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>([...map.<span class="title function_">entries</span>()]); <span class="comment">// [[&#x27;first&#x27;, 1], [&#x27;second&#x27;, 2], [&#x27;third&#x27;, 3]]</span></span><br></pre></td></tr></table></figure></div>
+
+<h3 id="Map-vs-Object-的性能对比"><a href="#Map-vs-Object-的性能对比" class="headerlink" title="Map vs Object 的性能对比"></a>Map vs Object 的性能对比</h3><div class="code-container" data-rel="Javascript"><figure class="iseeu highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 性能测试：频繁增删操作</span></span><br><span class="line"><span class="keyword">const</span> testSize = <span class="number">100000</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Object 测试</span></span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">time</span>(<span class="string">&#x27;Object&#x27;</span>);</span><br><span class="line"><span class="keyword">const</span> obj = &#123;&#125;;</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; testSize; i++) &#123;</span><br><span class="line">  obj[<span class="string">`key<span class="subst">$&#123;i&#125;</span>`</span>] = i;</span><br><span class="line">  <span class="keyword">delete</span> obj[<span class="string">`key<span class="subst">$&#123;i&#125;</span>`</span>];</span><br><span class="line">&#125;</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">timeEnd</span>(<span class="string">&#x27;Object&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// Map 测试</span></span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">time</span>(<span class="string">&#x27;Map&#x27;</span>);</span><br><span class="line"><span class="keyword">const</span> map = <span class="keyword">new</span> <span class="title class_">Map</span>();</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; testSize; i++) &#123;</span><br><span class="line">  map.<span class="title function_">set</span>(<span class="string">`key<span class="subst">$&#123;i&#125;</span>`</span>, i);</span><br><span class="line">  map.<span class="title function_">delete</span>(<span class="string">`key<span class="subst">$&#123;i&#125;</span>`</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">timeEnd</span>(<span class="string">&#x27;Map&#x27;</span>);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// Object: 40.439ms</span></span><br><span class="line"><span class="comment">// Map: 15.457ms</span></span><br><span class="line"><span class="comment">// Map 在频繁增删操作时性能更优</span></span><br></pre></td></tr></table></figure></div>
+
+<h3 id="实际应用场景"><a href="#实际应用场景" class="headerlink" title="实际应用场景"></a>实际应用场景</h3><div class="code-container" data-rel="Javascript"><figure class="iseeu highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 缓存管理</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">LRUCache</span> &#123;</span><br><span class="line">  <span class="title function_">constructor</span>(<span class="params">capacity</span>) &#123;</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">capacity</span> = capacity;</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">cache</span> = <span class="keyword">new</span> <span class="title class_">Map</span>();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="title function_">get</span>(<span class="params">key</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (!<span class="variable language_">this</span>.<span class="property">cache</span>.<span class="title function_">has</span>(key)) <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 将访问的元素移到最后（最新）</span></span><br><span class="line">    <span class="keyword">const</span> value = <span class="variable language_">this</span>.<span class="property">cache</span>.<span class="title function_">get</span>(key);</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">cache</span>.<span class="title function_">delete</span>(key);</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">cache</span>.<span class="title function_">set</span>(key, value);</span><br><span class="line">    <span class="keyword">return</span> value;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="title function_">put</span>(<span class="params">key, value</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="variable language_">this</span>.<span class="property">cache</span>.<span class="title function_">has</span>(key)) &#123;</span><br><span class="line">      <span class="variable language_">this</span>.<span class="property">cache</span>.<span class="title function_">delete</span>(key);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">cache</span>.<span class="title function_">set</span>(key, value);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 超出容量，删除最旧的（第一个）</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="variable language_">this</span>.<span class="property">cache</span>.<span class="property">size</span> &gt; <span class="variable language_">this</span>.<span class="property">capacity</span>) &#123;</span><br><span class="line">      <span class="keyword">const</span> firstKey = <span class="variable language_">this</span>.<span class="property">cache</span>.<span class="title function_">keys</span>().<span class="title function_">next</span>().<span class="property">value</span>;</span><br><span class="line">      <span class="variable language_">this</span>.<span class="property">cache</span>.<span class="title function_">delete</span>(firstKey);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
+
+<h2 id="二、Set：独特值的集合"><a href="#二、Set：独特值的集合" class="headerlink" title="二、Set：独特值的集合"></a>二、Set：独特值的集合</h2><h3 id="基本概念-1"><a href="#基本概念-1" class="headerlink" title="基本概念"></a>基本概念</h3><p>Set 是一个值的集合，其中每个值都是唯一的，不会重复。</p>
+<div class="code-container" data-rel="Javascript"><figure class="iseeu highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">const</span> set = <span class="keyword">new</span> <span class="title class_">Set</span>();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 添加值</span></span><br><span class="line">set.<span class="title function_">add</span>(<span class="number">1</span>);</span><br><span class="line">set.<span class="title function_">add</span>(<span class="number">2</span>);</span><br><span class="line">set.<span class="title function_">add</span>(<span class="number">2</span>); <span class="comment">// 重复值不会被添加</span></span><br><span class="line">set.<span class="title function_">add</span>(<span class="string">&#x27;2&#x27;</span>); <span class="comment">// 字符串&#x27;2&#x27;和数字2是不同的</span></span><br><span class="line"></span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(set.<span class="property">size</span>); <span class="comment">// 3</span></span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(set.<span class="title function_">has</span>(<span class="number">2</span>)); <span class="comment">// true</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 数组去重</span></span><br><span class="line"><span class="keyword">const</span> numbers = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">5</span>];</span><br><span class="line"><span class="keyword">const</span> uniqueNumbers = [...<span class="keyword">new</span> <span class="title class_">Set</span>(numbers)];</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(uniqueNumbers); <span class="comment">// [1, 2, 3, 4, 5]</span></span><br></pre></td></tr></table></figure></div>
+
+<h3 id="Set-的高级应用"><a href="#Set-的高级应用" class="headerlink" title="Set 的高级应用"></a>Set 的高级应用</h3><div class="code-container" data-rel="Javascript"><figure class="iseeu highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 1. 数组操作</span></span><br><span class="line"><span class="keyword">const</span> setA = <span class="keyword">new</span> <span class="title class_">Set</span>([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>]);</span><br><span class="line"><span class="keyword">const</span> setB = <span class="keyword">new</span> <span class="title class_">Set</span>([<span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>]);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 并集</span></span><br><span class="line"><span class="keyword">const</span> union = <span class="keyword">new</span> <span class="title class_">Set</span>([...setA, ...setB]);</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>([...union]); <span class="comment">// [1, 2, 3, 4, 5, 6]</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 交集</span></span><br><span class="line"><span class="keyword">const</span> intersection = <span class="keyword">new</span> <span class="title class_">Set</span>([...setA].<span class="title function_">filter</span>(<span class="function"><span class="params">x</span> =&gt;</span> setB.<span class="title function_">has</span>(x)));</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>([...intersection]); <span class="comment">// [3, 4]</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 差集</span></span><br><span class="line"><span class="keyword">const</span> difference = <span class="keyword">new</span> <span class="title class_">Set</span>([...setA].<span class="title function_">filter</span>(<span class="function"><span class="params">x</span> =&gt;</span> !setB.<span class="title function_">has</span>(x)));</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>([...difference]); <span class="comment">// [1, 2]</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 2. 对象去重</span></span><br><span class="line"><span class="keyword">const</span> users = [</span><br><span class="line">  &#123; <span class="attr">id</span>: <span class="number">1</span>, <span class="attr">name</span>: <span class="string">&#x27;Alice&#x27;</span> &#125;,</span><br><span class="line">  &#123; <span class="attr">id</span>: <span class="number">2</span>, <span class="attr">name</span>: <span class="string">&#x27;Bob&#x27;</span> &#125;,</span><br><span class="line">  &#123; <span class="attr">id</span>: <span class="number">1</span>, <span class="attr">name</span>: <span class="string">&#x27;Alice&#x27;</span> &#125;,</span><br><span class="line">  &#123; <span class="attr">id</span>: <span class="number">3</span>, <span class="attr">name</span>: <span class="string">&#x27;Charlie&#x27;</span> &#125;</span><br><span class="line">];</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> uniqueUsers = <span class="title class_">Array</span>.<span class="title function_">from</span>(</span><br><span class="line">  <span class="keyword">new</span> <span class="title class_">Map</span>(users.<span class="title function_">map</span>(<span class="function"><span class="params">user</span> =&gt;</span> [user.<span class="property">id</span>, user])).<span class="title function_">values</span>()</span><br><span class="line">);</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(uniqueUsers); <span class="comment">// 去重后的用户数组</span></span><br></pre></td></tr></table></figure></div>
+
+<h3 id="性能优势"><a href="#性能优势" class="headerlink" title="性能优势"></a>性能优势</h3><div class="code-container" data-rel="Javascript"><figure class="iseeu highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Set 的 has 方法性能测试</span></span><br><span class="line"><span class="keyword">const</span> arr = <span class="title class_">Array</span>.<span class="title function_">from</span>(&#123; <span class="attr">length</span>: <span class="number">10000</span> &#125;, <span class="function">(<span class="params">_, i</span>) =&gt;</span> i);</span><br><span class="line"><span class="keyword">const</span> set = <span class="keyword">new</span> <span class="title class_">Set</span>(arr);</span><br><span class="line"></span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">time</span>(<span class="string">&#x27;Array includes&#x27;</span>);</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; <span class="number">1000</span>; i++) &#123;</span><br><span class="line">  arr.<span class="title function_">includes</span>(<span class="number">9999</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">timeEnd</span>(<span class="string">&#x27;Array includes&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">time</span>(<span class="string">&#x27;Set has&#x27;</span>);</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; <span class="number">1000</span>; i++) &#123;</span><br><span class="line">  set.<span class="title function_">has</span>(<span class="number">9999</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">timeEnd</span>(<span class="string">&#x27;Set has&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// Set.has() 的时间复杂度是 O(1)，而 Array.includes() 是 O(n)</span></span><br></pre></td></tr></table></figure></div>
+
+<h2 id="三、WeakMap：弱引用的键值对集合"><a href="#三、WeakMap：弱引用的键值对集合" class="headerlink" title="三、WeakMap：弱引用的键值对集合"></a>三、WeakMap：弱引用的键值对集合</h2><h3 id="核心特性"><a href="#核心特性" class="headerlink" title="核心特性"></a>核心特性</h3><p>WeakMap 与 Map 类似，但有几个关键区别：</p>
+<ol>
+<li><strong>键必须是对象</strong>（不能是原始值）</li>
+<li><strong>键是弱引用的</strong>，不会阻止垃圾回收</li>
+<li><strong>不可迭代</strong>，没有 size 属性</li>
+</ol>
+<div class="code-container" data-rel="Javascript"><figure class="iseeu highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">const</span> wm = <span class="keyword">new</span> <span class="title class_">WeakMap</span>();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 只能使用对象作为键</span></span><br><span class="line"><span class="keyword">const</span> obj1 = &#123; <span class="attr">name</span>: <span class="string">&#x27;object1&#x27;</span> &#125;;</span><br><span class="line"><span class="keyword">const</span> obj2 = &#123; <span class="attr">name</span>: <span class="string">&#x27;object2&#x27;</span> &#125;;</span><br><span class="line"></span><br><span class="line">wm.<span class="title function_">set</span>(obj1, <span class="string">&#x27;value1&#x27;</span>);</span><br><span class="line">wm.<span class="title function_">set</span>(obj2, <span class="string">&#x27;value2&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(wm.<span class="title function_">get</span>(obj1)); <span class="comment">// &#x27;value1&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 不能使用原始值作为键</span></span><br><span class="line"><span class="comment">// wm.set(&#x27;string&#x27;, &#x27;value&#x27;); // TypeError</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 弱引用特性</span></span><br><span class="line"><span class="keyword">let</span> obj3 = &#123; <span class="attr">name</span>: <span class="string">&#x27;object3&#x27;</span> &#125;;</span><br><span class="line">wm.<span class="title function_">set</span>(obj3, <span class="string">&#x27;value3&#x27;</span>);</span><br><span class="line">obj3 = <span class="literal">null</span>; <span class="comment">// obj3 可以被垃圾回收，对应的 WeakMap 条目也会被清除</span></span><br></pre></td></tr></table></figure></div>
+
+<h3 id="WeakMap-的实际应用"><a href="#WeakMap-的实际应用" class="headerlink" title="WeakMap 的实际应用"></a>WeakMap 的实际应用</h3><div class="code-container" data-rel="Javascript"><figure class="iseeu highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 1. 私有属性实现</span></span><br><span class="line"><span class="keyword">const</span> privateData = <span class="keyword">new</span> <span class="title class_">WeakMap</span>();</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Person</span> &#123;</span><br><span class="line">  <span class="title function_">constructor</span>(<span class="params">name, age</span>) &#123;</span><br><span class="line">    privateData.<span class="title function_">set</span>(<span class="variable language_">this</span>, &#123; name, age &#125;);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="title function_">getName</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> privateData.<span class="title function_">get</span>(<span class="variable language_">this</span>).<span class="property">name</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="title function_">getAge</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> privateData.<span class="title function_">get</span>(<span class="variable language_">this</span>).<span class="property">age</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> person = <span class="keyword">new</span> <span class="title class_">Person</span>(<span class="string">&#x27;Alice&#x27;</span>, <span class="number">30</span>);</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(person.<span class="title function_">getName</span>()); <span class="comment">// &#x27;Alice&#x27;</span></span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(person.<span class="property">name</span>); <span class="comment">// undefined</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 2. DOM 元素关联数据</span></span><br><span class="line"><span class="keyword">const</span> elementData = <span class="keyword">new</span> <span class="title class_">WeakMap</span>();</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">attachData</span>(<span class="params">element, data</span>) &#123;</span><br><span class="line">  elementData.<span class="title function_">set</span>(element, data);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">getData</span>(<span class="params">element</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> elementData.<span class="title function_">get</span>(element);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 使用</span></span><br><span class="line"><span class="keyword">const</span> button = <span class="variable language_">document</span>.<span class="title function_">querySelector</span>(<span class="string">&#x27;#myButton&#x27;</span>);</span><br><span class="line"><span class="title function_">attachData</span>(button, &#123; <span class="attr">clickCount</span>: <span class="number">0</span> &#125;);</span><br><span class="line"></span><br><span class="line">button.<span class="title function_">addEventListener</span>(<span class="string">&#x27;click&#x27;</span>, <span class="function">() =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">const</span> data = <span class="title function_">getData</span>(button);</span><br><span class="line">  data.<span class="property">clickCount</span>++;</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">`Clicked <span class="subst">$&#123;data.clickCount&#125;</span> times`</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="内存管理优势"><a href="#内存管理优势" class="headerlink" title="内存管理优势"></a>内存管理优势</h3><div class="code-container" data-rel="Javascript"><figure class="iseeu highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 使用 Map 可能造成内存泄漏</span></span><br><span class="line"><span class="keyword">const</span> cache = <span class="keyword">new</span> <span class="title class_">Map</span>();</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">processData</span>(<span class="params">obj</span>) &#123;</span><br><span class="line">  <span class="keyword">if</span> (cache.<span class="title function_">has</span>(obj)) &#123;</span><br><span class="line">    <span class="keyword">return</span> cache.<span class="title function_">get</span>(obj);</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">const</span> result = <span class="title function_">expensiveOperation</span>(obj);</span><br><span class="line">  cache.<span class="title function_">set</span>(obj, result); <span class="comment">// obj 被 Map 引用，无法被垃圾回收</span></span><br><span class="line">  <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 使用 WeakMap 避免内存泄漏</span></span><br><span class="line"><span class="keyword">const</span> weakCache = <span class="keyword">new</span> <span class="title class_">WeakMap</span>();</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">processDataSafe</span>(<span class="params">obj</span>) &#123;</span><br><span class="line">  <span class="keyword">if</span> (weakCache.<span class="title function_">has</span>(obj)) &#123;</span><br><span class="line">    <span class="keyword">return</span> weakCache.<span class="title function_">get</span>(obj);</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">const</span> result = <span class="title function_">expensiveOperation</span>(obj);</span><br><span class="line">  weakCache.<span class="title function_">set</span>(obj, result); <span class="comment">// obj 可以被正常垃圾回收</span></span><br><span class="line">  <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
+
+<h2 id="四、WeakSet：弱引用的值集合"><a href="#四、WeakSet：弱引用的值集合" class="headerlink" title="四、WeakSet：弱引用的值集合"></a>四、WeakSet：弱引用的值集合</h2><h3 id="基本特性"><a href="#基本特性" class="headerlink" title="基本特性"></a>基本特性</h3><p>WeakSet 与 Set 类似，但具有以下特点：</p>
+<ol>
+<li><strong>只能存储对象</strong></li>
+<li><strong>对象是弱引用的</strong></li>
+<li><strong>不可迭代</strong></li>
+</ol>
+<div class="code-container" data-rel="Javascript"><figure class="iseeu highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">const</span> ws = <span class="keyword">new</span> <span class="title class_">WeakSet</span>();</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> obj1 = &#123; <span class="attr">id</span>: <span class="number">1</span> &#125;;</span><br><span class="line"><span class="keyword">const</span> obj2 = &#123; <span class="attr">id</span>: <span class="number">2</span> &#125;;</span><br><span class="line"></span><br><span class="line">ws.<span class="title function_">add</span>(obj1);</span><br><span class="line">ws.<span class="title function_">add</span>(obj2);</span><br><span class="line"></span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(ws.<span class="title function_">has</span>(obj1)); <span class="comment">// true</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 不能添加原始值</span></span><br><span class="line"><span class="comment">// ws.add(1); // TypeError</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 防止重复添加</span></span><br><span class="line">ws.<span class="title function_">add</span>(obj1); <span class="comment">// 不会报错，但也不会重复添加</span></span><br></pre></td></tr></table></figure></div>
+
+<h3 id="实际应用场景-1"><a href="#实际应用场景-1" class="headerlink" title="实际应用场景"></a>实际应用场景</h3><div class="code-container" data-rel="Javascript"><figure class="iseeu highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 1. 标记对象状态</span></span><br><span class="line"><span class="keyword">const</span> disabledElements = <span class="keyword">new</span> <span class="title class_">WeakSet</span>();</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">disableElement</span>(<span class="params">element</span>) &#123;</span><br><span class="line">  disabledElements.<span class="title function_">add</span>(element);</span><br><span class="line">  element.<span class="property">classList</span>.<span class="title function_">add</span>(<span class="string">&#x27;disabled&#x27;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">enableElement</span>(<span class="params">element</span>) &#123;</span><br><span class="line">  disabledElements.<span class="title function_">delete</span>(element);</span><br><span class="line">  element.<span class="property">classList</span>.<span class="title function_">remove</span>(<span class="string">&#x27;disabled&#x27;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">isDisabled</span>(<span class="params">element</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> disabledElements.<span class="title function_">has</span>(element);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 2. 防止递归调用</span></span><br><span class="line"><span class="keyword">const</span> processing = <span class="keyword">new</span> <span class="title class_">WeakSet</span>();</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">processObject</span>(<span class="params">obj</span>) &#123;</span><br><span class="line">  <span class="keyword">if</span> (processing.<span class="title function_">has</span>(obj)) &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;Already processing this object&#x27;</span>);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  processing.<span class="title function_">add</span>(obj);</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="comment">// 处理对象</span></span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;Processing:&#x27;</span>, obj);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 如果对象有子对象，递归处理</span></span><br><span class="line">    <span class="keyword">if</span> (obj.<span class="property">children</span>) &#123;</span><br><span class="line">      obj.<span class="property">children</span>.<span class="title function_">forEach</span>(<span class="function"><span class="params">child</span> =&gt;</span> <span class="title function_">processObject</span>(child));</span><br><span class="line">    &#125;</span><br><span class="line">  &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">    processing.<span class="title function_">delete</span>(obj);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
+
+<h2 id="五、在-React-中的应用"><a href="#五、在-React-中的应用" class="headerlink" title="五、在 React 中的应用"></a>五、在 React 中的应用</h2><h3 id="React-Fiber-中的-WeakMap-使用"><a href="#React-Fiber-中的-WeakMap-使用" class="headerlink" title="React Fiber 中的 WeakMap 使用"></a>React Fiber 中的 WeakMap 使用</h3><p>React 的 Fiber 架构中使用 WeakMap 来存储组件相关的信息：</p>
+<div class="code-container" data-rel="Javascript"><figure class="iseeu highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// React 源码简化示例</span></span><br><span class="line"><span class="keyword">const</span> fiberNodeMap = <span class="keyword">new</span> <span class="title class_">WeakMap</span>();</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">createFiberNode</span>(<span class="params">element</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> fiber = &#123;</span><br><span class="line">    <span class="attr">type</span>: element.<span class="property">type</span>,</span><br><span class="line">    <span class="attr">props</span>: element.<span class="property">props</span>,</span><br><span class="line">    <span class="comment">// ... 其他 fiber 属性</span></span><br><span class="line">  &#125;;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 将 DOM 元素与 Fiber 节点关联</span></span><br><span class="line">  <span class="keyword">if</span> (element.<span class="property">dom</span>) &#123;</span><br><span class="line">    fiberNodeMap.<span class="title function_">set</span>(element.<span class="property">dom</span>, fiber);</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">return</span> fiber;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">getFiberFromDOM</span>(<span class="params">domElement</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> fiberNodeMap.<span class="title function_">get</span>(domElement);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="React-Hooks-中的-Map-应用"><a href="#React-Hooks-中的-Map-应用" class="headerlink" title="React Hooks 中的 Map 应用"></a>React Hooks 中的 Map 应用</h3><div class="code-container" data-rel="Javascript"><figure class="iseeu highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// React Hooks 实现原理简化</span></span><br><span class="line"><span class="keyword">let</span> currentComponent = <span class="literal">null</span>;</span><br><span class="line"><span class="keyword">const</span> hooksMap = <span class="keyword">new</span> <span class="title class_">Map</span>();</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">useState</span>(<span class="params">initialState</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> component = currentComponent;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">if</span> (!hooksMap.<span class="title function_">has</span>(component)) &#123;</span><br><span class="line">    hooksMap.<span class="title function_">set</span>(component, []);</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">const</span> hooks = hooksMap.<span class="title function_">get</span>(component);</span><br><span class="line">  <span class="keyword">const</span> hookIndex = hooks.<span class="property">length</span>;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">if</span> (hooks[hookIndex] === <span class="literal">undefined</span>) &#123;</span><br><span class="line">    hooks[hookIndex] = &#123;</span><br><span class="line">      <span class="attr">state</span>: initialState,</span><br><span class="line">      <span class="attr">setState</span>: <span class="function">(<span class="params">newState</span>) =&gt;</span> &#123;</span><br><span class="line">        hooks[hookIndex].<span class="property">state</span> = newState;</span><br><span class="line">        <span class="title function_">reRender</span>(component);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">return</span> [hooks[hookIndex].<span class="property">state</span>, hooks[hookIndex].<span class="property">setState</span>];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
+
+<h2 id="六、在-Vue-中的应用"><a href="#六、在-Vue-中的应用" class="headerlink" title="六、在 Vue 中的应用"></a>六、在 Vue 中的应用</h2><h3 id="Vue-3-响应式系统中的-WeakMap"><a href="#Vue-3-响应式系统中的-WeakMap" class="headerlink" title="Vue 3 响应式系统中的 WeakMap"></a>Vue 3 响应式系统中的 WeakMap</h3><p>Vue 3 的响应式系统大量使用了 WeakMap 来存储依赖关系：</p>
+<div class="code-container" data-rel="Javascript"><figure class="iseeu highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Vue 3 响应式原理简化</span></span><br><span class="line"><span class="keyword">const</span> targetMap = <span class="keyword">new</span> <span class="title class_">WeakMap</span>();</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">track</span>(<span class="params">target, key</span>) &#123;</span><br><span class="line">  <span class="keyword">let</span> depsMap = targetMap.<span class="title function_">get</span>(target);</span><br><span class="line">  <span class="keyword">if</span> (!depsMap) &#123;</span><br><span class="line">    targetMap.<span class="title function_">set</span>(target, (depsMap = <span class="keyword">new</span> <span class="title class_">Map</span>()));</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">let</span> dep = depsMap.<span class="title function_">get</span>(key);</span><br><span class="line">  <span class="keyword">if</span> (!dep) &#123;</span><br><span class="line">    depsMap.<span class="title function_">set</span>(key, (dep = <span class="keyword">new</span> <span class="title class_">Set</span>()));</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  dep.<span class="title function_">add</span>(activeEffect);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">trigger</span>(<span class="params">target, key</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> depsMap = targetMap.<span class="title function_">get</span>(target);</span><br><span class="line">  <span class="keyword">if</span> (!depsMap) <span class="keyword">return</span>;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">const</span> dep = depsMap.<span class="title function_">get</span>(key);</span><br><span class="line">  <span class="keyword">if</span> (!dep) <span class="keyword">return</span>;</span><br><span class="line">  </span><br><span class="line">  dep.<span class="title function_">forEach</span>(<span class="function"><span class="params">effect</span> =&gt;</span> <span class="title function_">effect</span>());</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 创建响应式对象</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">reactive</span>(<span class="params">target</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Proxy</span>(target, &#123;</span><br><span class="line">    <span class="title function_">get</span>(<span class="params">target, key, receiver</span>) &#123;</span><br><span class="line">      <span class="title function_">track</span>(target, key);</span><br><span class="line">      <span class="keyword">return</span> <span class="title class_">Reflect</span>.<span class="title function_">get</span>(target, key, receiver);</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="title function_">set</span>(<span class="params">target, key, value, receiver</span>) &#123;</span><br><span class="line">      <span class="keyword">const</span> result = <span class="title class_">Reflect</span>.<span class="title function_">set</span>(target, key, value, receiver);</span><br><span class="line">      <span class="title function_">trigger</span>(target, key);</span><br><span class="line">      <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="Vue-组件实例管理"><a href="#Vue-组件实例管理" class="headerlink" title="Vue 组件实例管理"></a>Vue 组件实例管理</h3><div class="code-container" data-rel="Javascript"><figure class="iseeu highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Vue 组件实例缓存</span></span><br><span class="line"><span class="keyword">const</span> instanceMap = <span class="keyword">new</span> <span class="title class_">WeakMap</span>();</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">VueComponent</span> &#123;</span><br><span class="line">  <span class="title function_">constructor</span>(<span class="params">options</span>) &#123;</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">options</span> = options;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 将组件实例与其 DOM 元素关联</span></span><br><span class="line">    <span class="keyword">if</span> (options.<span class="property">el</span>) &#123;</span><br><span class="line">      instanceMap.<span class="title function_">set</span>(options.<span class="property">el</span>, <span class="variable language_">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">static</span> <span class="title function_">getInstance</span>(<span class="params">element</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> instanceMap.<span class="title function_">get</span>(element);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// KeepAlive 组件的缓存实现</span></span><br><span class="line"><span class="keyword">const</span> cache = <span class="keyword">new</span> <span class="title class_">Map</span>();</span><br><span class="line"><span class="keyword">const</span> keys = <span class="keyword">new</span> <span class="title class_">Set</span>();</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">pruneCache</span>(<span class="params">keepAliveInstance, filter</span>) &#123;</span><br><span class="line">  cache.<span class="title function_">forEach</span>(<span class="function">(<span class="params">entry, key</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> name = <span class="title function_">getComponentName</span>(entry.<span class="property">componentInstance</span>);</span><br><span class="line">    <span class="keyword">if</span> (name &amp;&amp; !<span class="title function_">filter</span>(name)) &#123;</span><br><span class="line">      <span class="title function_">pruneCacheEntry</span>(key);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">pruneCacheEntry</span>(<span class="params">key</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> cached = cache.<span class="title function_">get</span>(key);</span><br><span class="line">  <span class="keyword">if</span> (cached) &#123;</span><br><span class="line">    cached.<span class="property">componentInstance</span>.$destroy();</span><br><span class="line">  &#125;</span><br><span class="line">  cache.<span class="title function_">delete</span>(key);</span><br><span class="line">  keys.<span class="title function_">delete</span>(key);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
+
+<h2 id="七、性能优化最佳实践"><a href="#七、性能优化最佳实践" class="headerlink" title="七、性能优化最佳实践"></a>七、性能优化最佳实践</h2><h3 id="选择合适的数据结构"><a href="#选择合适的数据结构" class="headerlink" title="选择合适的数据结构"></a>选择合适的数据结构</h3><div class="code-container" data-rel="Javascript"><figure class="iseeu highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 场景1：需要频繁检查元素是否存在</span></span><br><span class="line"><span class="comment">// ❌ 不推荐：使用数组</span></span><br><span class="line"><span class="keyword">const</span> permissions = [<span class="string">&#x27;read&#x27;</span>, <span class="string">&#x27;write&#x27;</span>, <span class="string">&#x27;delete&#x27;</span>];</span><br><span class="line"><span class="keyword">if</span> (permissions.<span class="title function_">includes</span>(<span class="string">&#x27;write&#x27;</span>)) &#123; &#125; <span class="comment">// O(n)</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// ✅ 推荐：使用 Set</span></span><br><span class="line"><span class="keyword">const</span> permissionSet = <span class="keyword">new</span> <span class="title class_">Set</span>([<span class="string">&#x27;read&#x27;</span>, <span class="string">&#x27;write&#x27;</span>, <span class="string">&#x27;delete&#x27;</span>]);</span><br><span class="line"><span class="keyword">if</span> (permissionSet.<span class="title function_">has</span>(<span class="string">&#x27;write&#x27;</span>)) &#123; &#125; <span class="comment">// O(1)</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 场景2：需要关联 DOM 元素和数据</span></span><br><span class="line"><span class="comment">// ❌ 不推荐：使用 Map（可能造成内存泄漏）</span></span><br><span class="line"><span class="keyword">const</span> elementDataMap = <span class="keyword">new</span> <span class="title class_">Map</span>();</span><br><span class="line"></span><br><span class="line"><span class="comment">// ✅ 推荐：使用 WeakMap</span></span><br><span class="line"><span class="keyword">const</span> elementDataWeakMap = <span class="keyword">new</span> <span class="title class_">WeakMap</span>();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 场景3：需要有序的键值对</span></span><br><span class="line"><span class="comment">// ✅ Map 保持插入顺序</span></span><br><span class="line"><span class="keyword">const</span> orderedMap = <span class="keyword">new</span> <span class="title class_">Map</span>([</span><br><span class="line">  [<span class="string">&#x27;first&#x27;</span>, <span class="number">1</span>],</span><br><span class="line">  [<span class="string">&#x27;second&#x27;</span>, <span class="number">2</span>],</span><br><span class="line">  [<span class="string">&#x27;third&#x27;</span>, <span class="number">3</span>]</span><br><span class="line">]);</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="内存管理注意事项"><a href="#内存管理注意事项" class="headerlink" title="内存管理注意事项"></a>内存管理注意事项</h3><div class="code-container" data-rel="Javascript"><figure class="iseeu highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 避免内存泄漏的模式</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">EventManager</span> &#123;</span><br><span class="line">  <span class="title function_">constructor</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="comment">// 使用 WeakMap 存储事件监听器</span></span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">listeners</span> = <span class="keyword">new</span> <span class="title class_">WeakMap</span>();</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="title function_">addEventListener</span>(<span class="params">element, event, handler</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (!<span class="variable language_">this</span>.<span class="property">listeners</span>.<span class="title function_">has</span>(element)) &#123;</span><br><span class="line">      <span class="variable language_">this</span>.<span class="property">listeners</span>.<span class="title function_">set</span>(element, <span class="keyword">new</span> <span class="title class_">Map</span>());</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">const</span> elementListeners = <span class="variable language_">this</span>.<span class="property">listeners</span>.<span class="title function_">get</span>(element);</span><br><span class="line">    <span class="keyword">if</span> (!elementListeners.<span class="title function_">has</span>(event)) &#123;</span><br><span class="line">      elementListeners.<span class="title function_">set</span>(event, <span class="keyword">new</span> <span class="title class_">Set</span>());</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    elementListeners.<span class="title function_">get</span>(event).<span class="title function_">add</span>(handler);</span><br><span class="line">    element.<span class="title function_">addEventListener</span>(event, handler);</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="title function_">removeEventListener</span>(<span class="params">element, event, handler</span>) &#123;</span><br><span class="line">    <span class="keyword">const</span> elementListeners = <span class="variable language_">this</span>.<span class="property">listeners</span>.<span class="title function_">get</span>(element);</span><br><span class="line">    <span class="keyword">if</span> (!elementListeners) <span class="keyword">return</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">const</span> eventHandlers = elementListeners.<span class="title function_">get</span>(event);</span><br><span class="line">    <span class="keyword">if</span> (!eventHandlers) <span class="keyword">return</span>;</span><br><span class="line">    </span><br><span class="line">    eventHandlers.<span class="title function_">delete</span>(handler);</span><br><span class="line">    element.<span class="title function_">removeEventListener</span>(event, handler);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 清理空的集合</span></span><br><span class="line">    <span class="keyword">if</span> (eventHandlers.<span class="property">size</span> === <span class="number">0</span>) &#123;</span><br><span class="line">      elementListeners.<span class="title function_">delete</span>(event);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (elementListeners.<span class="property">size</span> === <span class="number">0</span>) &#123;</span><br><span class="line">      <span class="variable language_">this</span>.<span class="property">listeners</span>.<span class="title function_">delete</span>(element);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
+
+<h2 id="八、总结与建议"><a href="#八、总结与建议" class="headerlink" title="八、总结与建议"></a>八、总结与建议</h2><h3 id="何时使用-Map-Set"><a href="#何时使用-Map-Set" class="headerlink" title="何时使用 Map&#x2F;Set"></a>何时使用 Map&#x2F;Set</h3><ul>
+<li><strong>Map</strong>：当你需要键值对集合，且键可能是对象或需要保持插入顺序时</li>
+<li><strong>Set</strong>：当你需要存储唯一值，或进行集合运算（并集、交集、差集）时</li>
+</ul>
+<h3 id="何时使用-WeakMap-WeakSet"><a href="#何时使用-WeakMap-WeakSet" class="headerlink" title="何时使用 WeakMap&#x2F;WeakSet"></a>何时使用 WeakMap&#x2F;WeakSet</h3><ul>
+<li><strong>WeakMap</strong>：当你需要将数据与对象关联，且不想阻止对象被垃圾回收时</li>
+<li><strong>WeakSet</strong>：当你需要标记对象，或创建对象的弱引用集合时</li>
+</ul>
+<h3 id="性能考虑"><a href="#性能考虑" class="headerlink" title="性能考虑"></a>性能考虑</h3><ol>
+<li><strong>查找性能</strong>：Map&#x2F;Set 的查找是 O(1)，而数组是 O(n)</li>
+<li><strong>内存管理</strong>：WeakMap&#x2F;WeakSet 有助于防止内存泄漏</li>
+<li><strong>迭代性能</strong>：Map&#x2F;Set 可以直接迭代，性能优于对象的 Object.keys()</li>
+</ol>
+<p>这四种集合类型极大地丰富了 JavaScript 的数据结构选择，合理使用它们不仅能让代码更简洁、更具表现力，还能在性能和内存管理方面带来显著的提升。在现代前端框架的开发中，它们更是不可或缺的基础设施。</p>
+
+		</div>
+
+		
+		<div class="post-copyright-info w-full my-8 px-2 sm:px-6 md:px-8">
+			<div class="article-copyright-info-container">
+    <ul>
+        <li><strong>标题:</strong> 【秋招备战】JavaScript 集合类型深度解析</li>
+        <li><strong>作者:</strong> Simon</li>
+        <li><strong>创建于
+                :</strong> 2025-08-05 18:03:46</li>
+        
+            <li>
+                <strong>更新于
+                    :</strong> 2025-08-05 18:07:33
+            </li>
+        
+        <li>
+            <strong>链接:</strong> https://www.simonicle.cn/2025/08/05/【秋招备战】JavaScript 集合类型深度解析/
+        </li>
+        <li>
+            <strong>
+                版权声明:
+            </strong>
+            
+
+            
+                本文章采用 <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a> 进行许可。
+            
+        </li>
+    </ul>
+</div>
+
+		</div>
+		
+
+		
+		<ul class="post-tags-box text-lg mt-1.5 flex-wrap justify-center flex md:hidden">
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E7%A7%8B%E6%8B%9B/">#秋招</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/ES/">#ES</a>&nbsp;
+			</li>
+			
+		</ul>
+		
+
+		
+  <div class="recommended-article px-2 sm:px-6 md:px-8">
+   <div class="recommended-desktop">
+    <div class="recommended-article-header text-xl md:text-3xl font-bold mt-10">
+     <i aria-hidden="true"></i><span>推荐阅读</span>
+    </div>
+    <div class="recommended-article-group"><a class="recommended-article-item" href="/2025/07/22/%E3%80%90%E7%A7%8B%E6%8B%9B%E5%A4%87%E6%88%98%E3%80%91%E9%9D%A2%E8%AF%95%E6%89%8B%E6%92%95%E5%A4%A7%E9%9B%86%E5%90%88/" title="【秋招准备】面试手撕大集合" rel="bookmark">
+  <img src="/medias/shuishui.jpg" alt="【秋招准备】面试手撕大集合" class="!max-w-none">
+  <span class="title">【秋招准备】面试手撕大集合</span>
+</a><a class="recommended-article-item" href="/2025/07/24/%E3%80%90%E4%BB%8E%E9%A1%B9%E7%9B%AE%E5%88%B0%E6%8A%80%E6%9C%AF%E3%80%91React%E6%B8%B2%E6%9F%93%E6%97%B6%E6%9C%BA%E6%8C%87%E5%8D%97/" title="React渲染时机完全指南：从一个电商组件的优化说起" rel="bookmark">
+  <img src="/medias/fufu_sleep02.jpg" alt="React渲染时机完全指南：从一个电商组件的优化说起" class="!max-w-none">
+  <span class="title">React渲染时机完全指南：从一个电商组件的优化说起</span>
+</a><a class="recommended-article-item" href="/2025/07/22/%E3%80%90%E6%A6%82%E5%BF%B5%E8%A7%A3%E6%9E%90%E3%80%91%E5%89%8D%E7%AB%AF%E5%BC%80%E5%8F%91%E4%B8%AD%E7%9A%84Polyfill/" title="【概念解析】前端开发中的polypill" rel="bookmark">
+  <img src="/medias/fufu_sleep.jpg" alt="【概念解析】前端开发中的polypill" class="!max-w-none">
+  <span class="title">【概念解析】前端开发中的polypill</span>
+</a></div>
+   </div>
+   <div class="recommended-mobile">
+   <div class="recommended-article-header text-xl md:text-3xl font-bold mt-10">
+     <i aria-hidden="true"></i><span>推荐阅读</span>
+   </div>
+   <div class="recommended-article-group"><a class="recommended-article-item" href="/2025/07/22/%E3%80%90%E7%A7%8B%E6%8B%9B%E5%A4%87%E6%88%98%E3%80%91%E9%9D%A2%E8%AF%95%E6%89%8B%E6%92%95%E5%A4%A7%E9%9B%86%E5%90%88/" title="【秋招准备】面试手撕大集合" rel="bookmark">
+  <img src="/medias/shuishui.jpg" alt="【秋招准备】面试手撕大集合" class="!max-w-none">
+  <span class="title">【秋招准备】面试手撕大集合</span>
+</a><a class="recommended-article-item" href="/2025/07/24/%E3%80%90%E4%BB%8E%E9%A1%B9%E7%9B%AE%E5%88%B0%E6%8A%80%E6%9C%AF%E3%80%91React%E6%B8%B2%E6%9F%93%E6%97%B6%E6%9C%BA%E6%8C%87%E5%8D%97/" title="React渲染时机完全指南：从一个电商组件的优化说起" rel="bookmark">
+  <img src="/medias/fufu_sleep02.jpg" alt="React渲染时机完全指南：从一个电商组件的优化说起" class="!max-w-none">
+  <span class="title">React渲染时机完全指南：从一个电商组件的优化说起</span>
+</a></div>
+   </div>
+  </div>
+
+		
+		<div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
+			
+			
+			<div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="next" rel="next" href="/2025/07/24/%E3%80%90%E4%BB%8E%E9%A1%B9%E7%9B%AE%E5%88%B0%E6%8A%80%E6%9C%AF%E3%80%91React%E6%B8%B2%E6%9F%93%E6%97%B6%E6%9C%BA%E6%8C%87%E5%8D%97/">
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">React渲染时机完全指南：从一个电商组件的优化说起</span>
+						<span class="post-nav-item">下一篇</span>
+					</span>
+					<span class="right arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-right"></i>
+					</span>
+				</a>
+			</div>
+			
+		</div>
+		
+
+
+		
+		<div class="comment-container px-2 sm:px-6 md:px-8 pb-8">
+			<div class="comments-container mt-10 w-full ">
+    <div id="comment-anchor" class="w-full h-2.5"></div>
+    <div class="comment-area-title w-full my-1.5 md:my-2.5 text-xl md:text-3xl font-bold">
+        评论
+    </div>
+    
+
+        
+            
+    <div id="waline"></div>
+    <script type="module" data-swup-reload-script>
+      import { init } from '/js/libs/waline.mjs';
+
+      function loadWaline() {
+        init({
+          el: '#waline',
+          serverURL: 'https://www.simonicle.cn',
+          dark: 'body[class~="dark-mode"]',
+          reaction: false,
+          requiredMeta: ['nick', 'mail'],
+          emoji: [],
+                    lang: 'zh-CN',
+        });
+      }
+
+      if (typeof swup !== 'undefined') {
+        loadWaline();
+      } else {
+        window.addEventListener('DOMContentLoaded', loadWaline);
+      }
+    </script>
+
+
+
+        
+    
+</div>
+
+		</div>
+		
+	</div>
+
+	
+	<div class="toc-content-container">
+		<div class="post-toc-wrap">
+	<div class="post-toc">
+		<div class="toc-title">目录</div>
+		<div class="page-title">【秋招备战】JavaScript 集合类型深度解析</div>
+		<ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81Map%EF%BC%9A%E6%9B%B4%E5%BC%BA%E5%A4%A7%E7%9A%84%E9%94%AE%E5%80%BC%E5%AF%B9%E9%9B%86%E5%90%88"><span class="nav-text">一、Map：更强大的键值对集合</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="nav-text">基本概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Map-%E7%9A%84%E6%A0%B8%E5%BF%83%E7%89%B9%E6%80%A7"><span class="nav-text">Map 的核心特性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Map-vs-Object-%E7%9A%84%E6%80%A7%E8%83%BD%E5%AF%B9%E6%AF%94"><span class="nav-text">Map vs Object 的性能对比</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E9%99%85%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-text">实际应用场景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81Set%EF%BC%9A%E7%8B%AC%E7%89%B9%E5%80%BC%E7%9A%84%E9%9B%86%E5%90%88"><span class="nav-text">二、Set：独特值的集合</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5-1"><span class="nav-text">基本概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Set-%E7%9A%84%E9%AB%98%E7%BA%A7%E5%BA%94%E7%94%A8"><span class="nav-text">Set 的高级应用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%A7%E8%83%BD%E4%BC%98%E5%8A%BF"><span class="nav-text">性能优势</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81WeakMap%EF%BC%9A%E5%BC%B1%E5%BC%95%E7%94%A8%E7%9A%84%E9%94%AE%E5%80%BC%E5%AF%B9%E9%9B%86%E5%90%88"><span class="nav-text">三、WeakMap：弱引用的键值对集合</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E7%89%B9%E6%80%A7"><span class="nav-text">核心特性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#WeakMap-%E7%9A%84%E5%AE%9E%E9%99%85%E5%BA%94%E7%94%A8"><span class="nav-text">WeakMap 的实际应用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E4%BC%98%E5%8A%BF"><span class="nav-text">内存管理优势</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81WeakSet%EF%BC%9A%E5%BC%B1%E5%BC%95%E7%94%A8%E7%9A%84%E5%80%BC%E9%9B%86%E5%90%88"><span class="nav-text">四、WeakSet：弱引用的值集合</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E7%89%B9%E6%80%A7"><span class="nav-text">基本特性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E9%99%85%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF-1"><span class="nav-text">实际应用场景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E5%9C%A8-React-%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8"><span class="nav-text">五、在 React 中的应用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#React-Fiber-%E4%B8%AD%E7%9A%84-WeakMap-%E4%BD%BF%E7%94%A8"><span class="nav-text">React Fiber 中的 WeakMap 使用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#React-Hooks-%E4%B8%AD%E7%9A%84-Map-%E5%BA%94%E7%94%A8"><span class="nav-text">React Hooks 中的 Map 应用</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E5%9C%A8-Vue-%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8"><span class="nav-text">六、在 Vue 中的应用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Vue-3-%E5%93%8D%E5%BA%94%E5%BC%8F%E7%B3%BB%E7%BB%9F%E4%B8%AD%E7%9A%84-WeakMap"><span class="nav-text">Vue 3 响应式系统中的 WeakMap</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Vue-%E7%BB%84%E4%BB%B6%E5%AE%9E%E4%BE%8B%E7%AE%A1%E7%90%86"><span class="nav-text">Vue 组件实例管理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%83%E3%80%81%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5"><span class="nav-text">七、性能优化最佳实践</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%89%E6%8B%A9%E5%90%88%E9%80%82%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-text">选择合适的数据结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="nav-text">内存管理注意事项</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AB%E3%80%81%E6%80%BB%E7%BB%93%E4%B8%8E%E5%BB%BA%E8%AE%AE"><span class="nav-text">八、总结与建议</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%95%E6%97%B6%E4%BD%BF%E7%94%A8-Map-Set"><span class="nav-text">何时使用 Map&#x2F;Set</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%95%E6%97%B6%E4%BD%BF%E7%94%A8-WeakMap-WeakSet"><span class="nav-text">何时使用 WeakMap&#x2F;WeakSet</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%A7%E8%83%BD%E8%80%83%E8%99%91"><span class="nav-text">性能考虑</span></a></li></ol></li></ol>
+
+	</div>
+</div>
+	</div>
+	
+</div>
+			</div>
+
+			
+		</div>
+
+		<div class="main-content-footer">
+			<footer class="footer mt-5 py-5 h-auto text-base text-third-text-color relative border-t-2 border-t-border-color">
+    <div class="info-container py-3 text-center">
+        
+            <div class="customize-info my-1">你说的对，但是《原神》是由米哈游自主研发的一款全新开放世界冒险游戏。</div>
+        
+        <div class="text-center">
+            &copy;
+            
+              <span>2025</span>
+              -
+            
+            2025&nbsp;&nbsp;<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #f54545"></i>&nbsp;&nbsp;<a href="/">Simon</a>
+            
+                
+                <p class="post-count space-x-0.5">
+                    <span>
+                        共撰写了 6 篇文章
+                    </span>
+                    
+                </p>
+            
+        </div>
+        
+            <script data-swup-reload-script src="https://cn.vercount.one/js"></script>
+            <div class="relative text-center lg:absolute lg:right-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-right">
+                
+                    <span id="busuanzi_container_site_uv" class="lg:!block">
+                        <span class="text-sm">访问人数</span>
+                        <span id="busuanzi_value_site_uv"></span>
+                    </span>
+                
+                
+                    <span id="busuanzi_container_site_pv" class="lg:!block">
+                        <span class="text-sm">总访问量</span>
+                        <span id="busuanzi_value_site_pv"></span>
+                    </span>
+                
+            </div>
+        
+        <div class="relative text-center lg:absolute lg:left-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-left">
+            <span class="lg:block text-sm">由 <?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg class="relative top-[2px] inline-block align-baseline" version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1rem" height="1rem" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><path fill="#0E83CD" d="M256.4,25.8l-200,115.5L56,371.5l199.6,114.7l200-115.5l0.4-230.2L256.4,25.8z M349,354.6l-18.4,10.7l-18.6-11V275H200v79.6l-18.4,10.7l-18.6-11v-197l18.5-10.6l18.5,10.8V237h112v-79.6l18.5-10.6l18.5,10.8V354.6z"/></svg><a target="_blank" class="text-base" href="https://hexo.io">Hexo</a> 驱动</span>
+            <span class="text-sm lg:block">主题&nbsp;<a class="text-base" target="_blank" href="https://github.com/EvanNotFound/hexo-theme-redefine">Redefine v2.8.5</a></span>
+        </div>
+        
+        
+            <div>
+                博客已运行 <span class="odometer" id="runtime_days" ></span> 天 <span class="odometer" id="runtime_hours"></span> 小时 <span class="odometer" id="runtime_minutes"></span> 分钟 <span class="odometer" id="runtime_seconds"></span> 秒
+            </div>
+        
+        
+            <script data-swup-reload-script>
+                try {
+                    function odometer_init() {
+                    const elements = document.querySelectorAll('.odometer');
+                    elements.forEach(el => {
+                        new Odometer({
+                            el,
+                            format: '( ddd).dd',
+                            duration: 200
+                        });
+                    });
+                    }
+                    odometer_init();
+                } catch (error) {}
+            </script>
+        
+        
+        
+    </div>  
+</footer>
+		</div>
+	</div>
+
+	
+	<div class="post-tools">
+		<div class="post-tools-container">
+	<ul class="article-tools-list">
+		<!-- TOC aside toggle -->
+		
+		<li class="right-bottom-tools page-aside-toggle">
+			<i class="fa-regular fa-outdent"></i>
+		</li>
+		
+
+		<!-- go comment -->
+		
+		<li class="go-comment">
+			<i class="fa-regular fa-comments"></i>
+		</li>
+		
+	</ul>
+</div>
+	</div>
+	
+
+	<div class="right-side-tools-container">
+		<div class="side-tools-container">
+	<ul class="hidden-tools-list">
+		<li class="right-bottom-tools tool-font-adjust-plus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-plus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-font-adjust-minus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-minus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-dark-light-toggle flex justify-center items-center">
+			<i class="fa-regular fa-moon"></i>
+		</li>
+
+		<!-- rss -->
+		
+
+		
+
+		<li class="right-bottom-tools tool-scroll-to-bottom flex justify-center items-center">
+			<i class="fa-regular fa-arrow-down"></i>
+		</li>
+	</ul>
+
+	<ul class="visible-tools-list">
+		<li class="right-bottom-tools toggle-tools-list flex justify-center items-center">
+			<i class="fa-regular fa-cog fa-spin"></i>
+		</li>
+		
+		<li class="right-bottom-tools tool-scroll-to-top flex justify-center items-center">
+			<i class="arrow-up fas fa-arrow-up"></i>
+			<span class="percent"></span>
+		</li>
+		
+		
+	</ul>
+</div>
+	</div>
+
+	<div class="image-viewer-container">
+	<img src="">
+</div>
+
+	
+	<div class="search-pop-overlay">
+	<div class="popup search-popup">
+		<div class="search-header">
+			<span class="search-input-field-pre">
+				<i class="fa-solid fa-keyboard"></i>
+			</span>
+			<div class="search-input-container">
+				<input autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="站内搜索您需要的内容..." spellcheck="false" type="search" class="search-input">
+			</div>
+			<span class="popup-btn-close">
+				<i class="fa-solid fa-times"></i>
+			</span>
+		</div>
+		<div id="search-result">
+			<div id="no-result">
+				<i class="fa-solid fa-spinner fa-spin-pulse fa-5x fa-fw"></i>
+			</div>
+		</div>
+	</div>
+</div>
+	
+
+</main>
+
+
+<script  src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/libs/Swup.min.js" ></script><script  src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/libs/SwupSlideTheme.min.js" ></script><script  src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/libs/SwupScriptsPlugin.min.js" ></script><script  src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/libs/SwupProgressPlugin.min.js" ></script><script  src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/libs/SwupScrollPlugin.min.js" ></script><script  src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/libs/SwupPreloadPlugin.min.js" ></script>
+<script>
+    const swup = new Swup({
+        plugins: [
+            new SwupScriptsPlugin({
+                optin: true,
+            }),
+            new SwupProgressPlugin(),
+            new SwupScrollPlugin({
+                offset: 80,
+            }),
+            new SwupSlideTheme({
+                mainElement: ".main-content-body",
+            }),
+            new SwupPreloadPlugin(),
+        ],
+        containers: ["#swup"],
+    });
+</script>
+
+
+
+
+	<script type="module" src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/tools/imageViewer.js" ></script><script type="module" src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/utils.js" ></script><script type="module" src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/main.js" ></script><script type="module" src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/layouts/navbarShrink.js" ></script><script type="module" src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/tools/scrollTopBottom.js" ></script><script type="module" src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/tools/lightDarkSwitch.js" ></script><script type="module" src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/layouts/categoryList.js" ></script>
+
+
+    <script type="module" src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/tools/localSearch.js" ></script>
+
+
+
+    <script type="module" src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/tools/codeBlock.js" ></script>
+
+
+
+    <script type="module" src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/layouts/lazyload.js" ></script>
+
+
+
+    <script  src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/tools/runtime.js" ></script>
+    <script  src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/libs/odometer.min.js" ></script>
+    <link rel="stylesheet" href="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/assets/odometer-theme-minimal.css">
+
+
+
+  <script  src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/libs/Typed.min.js" ></script>
+  <script type="module" src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/plugins/typed.js" ></script>
+
+
+
+    
+        <script  src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/libs/mermaid.min.js" ></script>
+    
+    <script  src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/plugins/mermaid.js" ></script>
+
+
+
+
+
+
+
+
+    <script type="module" src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/tools/tocToggle.js" data-swup-reload-script></script><script type="module" src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/layouts/toc.js" data-swup-reload-script></script><script type="module" src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/plugins/tabs.js" data-swup-reload-script></script>
+
+
+<script  src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/libs/moment-with-locales.min.js" data-swup-reload-script></script>
+<script type="module" src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/layouts/essays.js" data-swup-reload-script></script>
+
+
+
+
+	
+</body>
+
+</html>
