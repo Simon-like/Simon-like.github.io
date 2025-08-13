@@ -1396,4 +1396,152 @@ MVC模式class Model &#123;  constructor() &#123;    this.data = &#123;      nam
         <tag>前端手撕</tag>
       </tags>
   </entry>
+  <entry>
+    <title>【秋招备战】React路由管理方案：Redux vs MobX</title>
+    <url>/2025/08/13/%E3%80%90%E7%A7%8B%E6%8B%9B%E5%A4%87%E6%88%98%E3%80%91React%E8%B7%AF%E7%94%B1%E7%AE%A1%E7%90%86%E6%96%B9%E6%A1%88%EF%BC%9ARedux%20vs%20MobX/</url>
+    <content><![CDATA[
+朋友，听说你在准备秋招？那今天咱们来聊聊前端江湖里的两大门派——Redux 和 MobX。这两位可都是状态管理界的大佬，一个像少林寺的易筋经，招式规矩森严；一个像逍遥派的北冥神功，灵活自在。让我们一起揭开它们的神秘面纱。
+
+第一章：初入江湖——为什么需要状态管理？想象一下，你在开发一个电商网站。用户的购物车数据需要在导航栏、购物车页面、结账页面共享，如果没有状态管理，你就得像传话游戏一样，一层层把数据传下去：
+// 没有状态管理的痛苦传话游戏&lt;App cartItems=&#123;cartItems&#125;&gt;  &lt;Header cartItems=&#123;cartItems&#125;&gt;    &lt;CartIcon cartItems=&#123;cartItems&#125;&gt;      &lt;CartCount count=&#123;cartItems.length&#125; /&gt; // 终于到了！累死了...    &lt;/CartIcon&gt;  &lt;/Header&gt;&lt;/App&gt;
+
+这就是传说中的”prop drilling”（属性钻孔），钻着钻着，你就想掀桌子了。
+第二章：Redux——规矩森严的少林派Redux 的基本招式Redux 就像一个超级严格的图书管理员，它有三大金科玉律：
+
+单一数据源（Single Source of Truth）：整个应用只有一个 store，就像图书馆只有一个总目录
+State 是只读的：你不能直接改书，只能提交申请
+使用纯函数修改：修改必须按规矩来，不能搞特殊
+
+来看看 Redux 的基本套路：
+// 1. 定义 Action（你的申请单）const ADD_TO_CART = &#x27;ADD_TO_CART&#x27;;const addToCart = (product) =&gt; (&#123;  type: ADD_TO_CART,  payload: product&#125;);// 2. 创建 Reducer（图书管理员的处理规则）const cartReducer = (state = [], action) =&gt; &#123;  switch (action.type) &#123;    case ADD_TO_CART:      // 注意！必须返回新对象，不能直接修改      return [...state, action.payload];    default:      return state;  &#125;&#125;;// 3. 创建 Store（图书馆）import &#123; createStore &#125; from &#x27;redux&#x27;;const store = createStore(cartReducer);// 4. 使用 Storestore.dispatch(addToCart(&#123; id: 1, name: &#x27;秋招面试宝典&#x27;, price: 99 &#125;));console.log(store.getState()); // [&#123; id: 1, name: &#x27;秋招面试宝典&#x27;, price: 99 &#125;]
+
+Redux 的内功心法——实现原理Redux 的核心其实就是一个发布-订阅模式，我来给你”解剖”一下它的内部构造：
+// 简化版 Redux 实现（去掉了中间件等复杂功能）function createStore(reducer, initialState) &#123;  let state = initialState;  let listeners = []; // 订阅者名单    // 获取当前状态  const getState = () =&gt; state;    // 订阅变化  const subscribe = (listener) =&gt; &#123;    listeners.push(listener);    // 返回取消订阅的函数（贴心不？）    return () =&gt; &#123;      listeners = listeners.filter(l =&gt; l !== listener);    &#125;;  &#125;;    // 派发 action  const dispatch = (action) =&gt; &#123;    // 通过 reducer 计算新状态    state = reducer(state, action);    // 通知所有订阅者：&quot;兄弟们，数据更新了！&quot;    listeners.forEach(listener =&gt; listener());    return action;  &#125;;    // 初始化 state  dispatch(&#123; type: &#x27;@@INIT&#x27; &#125;);    return &#123; getState, subscribe, dispatch &#125;;&#125;
+
+看到了吗？Redux 就像一个严格的广播电台：
+
+dispatch 一个 action &#x3D; 发送广播信号
+reducer 处理 &#x3D; 电台处理信号
+通知所有 listeners &#x3D; 广播给所有收音机
+
+Redux 在 React 中的实战在 React 中使用 Redux，需要 react-redux 这个”翻译官”：
+// 1. 使用 Provider 包裹应用import &#123; Provider &#125; from &#x27;react-redux&#x27;;function App() &#123;  return (    &lt;Provider store=&#123;store&#125;&gt;      &lt;YourAppComponents /&gt;    &lt;/Provider&gt;  );&#125;// 2. 使用 hooks 连接组件import &#123; useSelector, useDispatch &#125; from &#x27;react-redux&#x27;;function ShoppingCart() &#123;  // useSelector 就像一个监视器，盯着 state 的变化  const cartItems = useSelector(state =&gt; state.cart);  const dispatch = useDispatch();    const handleAddItem = (product) =&gt; &#123;    dispatch(addToCart(product));  &#125;;    return (    &lt;div&gt;      &lt;h2&gt;购物车（&#123;cartItems.length&#125;件商品）&lt;/h2&gt;      &#123;/* ... */&#125;    &lt;/div&gt;  );&#125;
+
+第三章：MobX——自由奔放的逍遥派如果说 Redux 是个严格的图书管理员，那 MobX 就是个贴心的私人助理。它会自动追踪你需要什么，然后在数据变化时自动更新。
+MobX 的基本招式import &#123; makeObservable, observable, action, computed &#125; from &#x27;mobx&#x27;;class ShoppingCart &#123;  items = [];    constructor() &#123;    // 告诉 MobX：&quot;帮我盯着这些东西&quot;    makeObservable(this, &#123;      items: observable,      addItem: action,      removeItem: action,      totalPrice: computed    &#125;);  &#125;    // 直接修改，没有那么多规矩  addItem(product) &#123;    this.items.push(product);  &#125;    removeItem(id) &#123;    const index = this.items.findIndex(item =&gt; item.id === id);    if (index &gt; -1) &#123;      this.items.splice(index, 1);    &#125;  &#125;    // 计算属性，自动缓存  get totalPrice() &#123;    return this.items.reduce((sum, item) =&gt; sum + item.price, 0);  &#125;&#125;const cart = new ShoppingCart();
+
+看到了吗？MobX 就像你的贴心小棉袄，你直接改数据就行，它会自动通知该通知的人。
+MobX 的内功心法——响应式原理MobX 的魔法主要来自于 ES6 的 Proxy（或者在老版本中用 Object.defineProperty）。让我来揭秘一下：
+// 简化版 MobX 原理function makeObservable(target) &#123;  const observers = new Set(); // 观察者集合    // 使用 Proxy 拦截对象操作  return new Proxy(target, &#123;    get(obj, prop) &#123;      // 收集依赖：&quot;哦，有人在读取这个属性&quot;      if (currentObserver) &#123;        observers.add(currentObserver);      &#125;      return obj[prop];    &#125;,        set(obj, prop, value) &#123;      obj[prop] = value;      // 通知观察者：&quot;兄弟们，数据变了！&quot;      observers.forEach(observer =&gt; observer());      return true;    &#125;  &#125;);&#125;// 追踪函数执行时访问了哪些属性let currentObserver = null;function autorun(fn) &#123;  currentObserver = fn;  fn(); // 执行一次，收集依赖  currentObserver = null;&#125;// 使用示例const person = makeObservable(&#123; name: &#x27;小明&#x27;, age: 25 &#125;);autorun(() =&gt; &#123;  console.log(`$&#123;person.name&#125; 今年 $&#123;person.age&#125; 岁`);&#125;);person.age = 26; // 自动触发 console.log
+
+MobX 的精髓就是：
+
+依赖收集：当你读取数据时，MobX 偷偷记下”谁在用这个数据”
+自动更新：当数据变化时，MobX 通知所有用到这个数据的地方
+
+这就像你在淘宝收藏了一个商品，降价时自动给你发通知一样贴心！
+MobX 在 React 中的实战import &#123; observer &#125; from &#x27;mobx-react-lite&#x27;;// observer 是个高阶组件，让组件&quot;有眼力见&quot;const ShoppingCart = observer(() =&gt; &#123;  // 直接使用，没有 hook，没有 dispatch  const cart = useCart(); // 假设这是你的 cart store    return (    &lt;div&gt;      &lt;h2&gt;购物车（&#123;cart.items.length&#125;件商品）&lt;/h2&gt;      &lt;p&gt;总价：&#123;cart.totalPrice&#125;元&lt;/p&gt;      &lt;button onClick=&#123;() =&gt; cart.addItem(newProduct)&#125;&gt;        添加商品      &lt;/button&gt;    &lt;/div&gt;  );&#125;);
+
+第四章：江湖对决——Redux vs MobX好了，两位大侠的绝学都展示完了，让我们来个正面对决：
+学习曲线Redux：就像学开手动挡汽车，一开始各种熄火，但学会了你就是老司机。
+
+Action、Reducer、Store、Middleware… 概念一大堆
+必须理解函数式编程思想
+代码量多（这也叫 boilerplate）
+
+MobX：像自动挡，上手就能开，但你可能不知道变速箱怎么工作的。
+
+面向对象，符合直觉
+装饰器语法很优雅
+代码量少
+
+可预测性Redux：
+// Redux 的每一步都有迹可循dispatch(action) → reducer → new state → UI update// 时间旅行调试，可以回放每个 action
+
+MobX：
+// MobX 的更新是自动的，有时候像黑魔法observable.value = newValue → ??? → UI update// 调试时可能会想：&quot;咦，这咋就更新了？&quot;
+
+性能优化Redux：
+
+需要手动优化（useSelector、reselect 等）
+容易产生不必要的渲染
+但优化后性能很好
+
+MobX：
+
+自动优化，只更新真正需要更新的组件
+细粒度的响应式更新
+开箱即用的好性能
+
+使用场景选 Redux 的场景：
+
+大型应用，需要严格的数据流
+团队协作，需要统一的规范
+需要时间旅行调试
+需要持久化、同步等高级功能
+
+选 MobX 的场景：
+
+中小型应用，追求开发效率
+有很多派生状态（computed）
+团队熟悉面向对象编程
+不想写太多样板代码
+
+第五章：实战技巧与注意事项Redux 的坑与技巧
+不可变更新的坑：
+
+// ❌ 错误：直接修改state.items.push(newItem);// ✅ 正确：返回新对象return &#123;  ...state,  items: [...state.items, newItem]&#125;;// 💡 技巧：使用 Immer 简化不可变更新import produce from &#x27;immer&#x27;;const reducer = produce((draft, action) =&gt; &#123;  // 现在可以直接修改 draft  draft.items.push(action.payload);&#125;);
+
+
+异步处理：
+
+// 使用 Redux Thunk 处理异步const fetchUserData = (userId) =&gt; async (dispatch) =&gt; &#123;  dispatch(&#123; type: &#x27;FETCH_START&#x27; &#125;);  try &#123;    const data = await api.getUser(userId);    dispatch(&#123; type: &#x27;FETCH_SUCCESS&#x27;, payload: data &#125;);  &#125; catch (error) &#123;    dispatch(&#123; type: &#x27;FETCH_ERROR&#x27;, payload: error &#125;);  &#125;&#125;;
+
+MobX 的坑与技巧
+观察数组和对象：
+
+// ⚠️ 注意：MobX 4/5 需要使用 observable 数组的方法class Store &#123;  @observable items = [];    @action addItem(item) &#123;    // ✅ 这样会触发更新    this.items.push(item);        // ❌ 这样不会触发更新（MobX 4/5）    // this.items[this.items.length] = item;  &#125;&#125;
+
+
+避免过度使用 computed：
+
+class Store &#123;  @observable users = [];    // ✅ 好的 computed：有复杂计算  @computed get activeUsers() &#123;    return this.users.filter(u =&gt; u.isActive &amp;&amp; u.lastLogin &gt; someDate);  &#125;    // ❌ 不必要的 computed：太简单了  @computed get userCount() &#123;    return this.users.length; // 直接用 users.length 就行  &#125;&#125;
+
+第六章：2024 年的新趋势Redux Toolkit —— Redux 的现代化改造Redux 听到了大家的抱怨，推出了 Redux Toolkit (RTK)：
+import &#123; createSlice &#125; from &#x27;@reduxjs/toolkit&#x27;;// 一个 slice 搞定 actions + reducerconst cartSlice = createSlice(&#123;  name: &#x27;cart&#x27;,  initialState: [],  reducers: &#123;    addItem: (state, action) =&gt; &#123;      // 可以直接修改！RTK 内置了 Immer      state.push(action.payload);    &#125;,    removeItem: (state, action) =&gt; &#123;      return state.filter(item =&gt; item.id !== action.payload);    &#125;  &#125;&#125;);export const &#123; addItem, removeItem &#125; = cartSlice.actions;export default cartSlice.reducer;
+
+MobX 6 的新特性MobX 6 带来了更简洁的 API：
+import &#123; makeAutoObservable &#125; from &#x27;mobx&#x27;;class Store &#123;  items = [];    constructor() &#123;    // 自动将所有属性和方法变成 observable/action    makeAutoObservable(this);  &#125;    addItem(item) &#123;    this.items.push(item);  &#125;&#125;
+
+第七章：面试高频问题面试官：Redux 的中间件原理是什么？你的回答：中间件就像快递的中转站，action 在到达 reducer 之前会经过中间件处理：
+// 中间件的本质是函数组合const middleware = store =&gt; next =&gt; action =&gt; &#123;  console.log(&#x27;dispatching&#x27;, action);  const result = next(action); // 调用下一个中间件  console.log(&#x27;next state&#x27;, store.getState());  return result;&#125;;
+
+面试官：MobX 和 Vue 的响应式有什么区别？你的回答：
+
+Vue 2：使用 Object.defineProperty，需要预定义属性
+Vue 3 和 MobX：都使用 Proxy，可以动态添加属性
+MobX 是显式声明（makeObservable），Vue 是自动的（data 函数）
+
+结语：没有银弹，只有权衡记住，Redux 和 MobX 都是工具，没有绝对的好坏。就像金庸小说里，降龙十八掌刚猛无比，凌波微步飘逸灵动，关键看你要打什么怪。
+给秋招的你一些建议：
+
+两个都要了解，但精通一个就够了
+理解原理比会用 API 更重要
+项目中遇到状态管理的痛点，才能真正理解这些工具的价值
+面试时能讲清楚权衡（trade-off）比死记硬背更加分
+
+最后，祝你秋招顺利，offer 拿到手软！记住，技术只是工具，解决问题的思维才是核心竞争力。
+
+P.S. 如果这篇文章对你有帮助，记得给未来的同事们也分享一下。毕竟，独乐乐不如众乐乐，一起进步才是真的进步！
+]]></content>
+      <categories>
+        <category>秋招准备</category>
+      </categories>
+      <tags>
+        <tag>React</tag>
+        <tag>秋招</tag>
+        <tag>Redux</tag>
+        <tag>Mobx</tag>
+      </tags>
+  </entry>
 </search>
