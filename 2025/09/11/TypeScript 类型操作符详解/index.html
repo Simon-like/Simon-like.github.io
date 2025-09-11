@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="Simon">
+    
+    <meta name="author" content="Simon">
+    
+    <!-- Completely eliminate flash of wrong theme -->
+    <script>
+        (function() {
+            const THEME_KEY = "REDEFINE-THEME-STATUS";
+            const DARK = "dark", LIGHT = "light";
+            
+            // Get preferred theme
+            function getTheme() {
+                try {
+                    const saved = localStorage.getItem(THEME_KEY);
+                    if (saved) {
+                        const { isDark } = JSON.parse(saved);
+                        return isDark ? DARK : LIGHT;
+                    }
+                } catch (e) {}
+                
+                return matchMedia("(prefers-color-scheme: dark)").matches ? DARK : LIGHT;
+            }
+            
+            // Apply theme to document
+            function applyTheme(theme) {
+                const isDark = theme === DARK;
+                const root = document.documentElement;
+                
+                // Set data attribute for CSS variables
+                root.setAttribute("data-theme", theme);
+                
+                // Set classes for compatibility
+                root.classList.add(theme);
+                root.classList.remove(isDark ? LIGHT : DARK);
+                root.style.colorScheme = theme;
+            }
+            
+            // Initial application
+            const theme = getTheme();
+            applyTheme(theme);
+            
+            // Listen for system preference changes
+            matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
+                // Only update if using system preference (no localStorage entry)
+                if (!localStorage.getItem(THEME_KEY)) {
+                    applyTheme(matches ? DARK : LIGHT);
+                }
+            });
+            
+            // Set body classes once DOM is ready
+            if (document.readyState !== "loading") {
+                document.body.classList.add(theme + "-mode");
+            } else {
+                document.addEventListener("DOMContentLoaded", () => {
+                    document.body.classList.add(theme + "-mode");
+                    document.body.classList.remove((theme === DARK ? LIGHT : DARK) + "-mode");
+                });
+            }
+        })();
+    </script>
+    
+    <!-- Critical CSS to prevent flash -->
+    <style>
+        :root[data-theme="dark"] {
+            --background-color: #202124;
+            --background-color-transparent: rgba(32, 33, 36, 0.6);
+            --second-background-color: #2d2e32;
+            --third-background-color: #34353a;
+            --third-background-color-transparent: rgba(32, 33, 36, 0.6);
+            --primary-color: #0066CC;
+            --first-text-color: #ffffff;
+            --second-text-color: #eeeeee;
+            --third-text-color: #bebec6;
+            --fourth-text-color: #999999;
+            --default-text-color: #bebec6;
+            --invert-text-color: #373D3F;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --selection-color: #0066CC;
+            --shadow-color-1: rgba(255, 255, 255, 0.08);
+            --shadow-color-2: rgba(255, 255, 255, 0.05);
+        }
+        
+        :root[data-theme="light"] {
+            --background-color: #fff;
+            --background-color-transparent: rgba(255, 255, 255, 0.6);
+            --second-background-color: #f8f8f8;
+            --third-background-color: #f2f2f2;
+            --third-background-color-transparent: rgba(241, 241, 241, 0.6);
+            --primary-color: #0066CC;
+            --first-text-color: #16171a;
+            --second-text-color: #2f3037;
+            --third-text-color: #5e5e5e;
+            --fourth-text-color: #eeeeee;
+            --default-text-color: #373D3F;
+            --invert-text-color: #bebec6;
+            --border-color: rgba(0, 0, 0, 0.08);
+            --selection-color: #0066CC;
+            --shadow-color-1: rgba(0, 0, 0, 0.08);
+            --shadow-color-2: rgba(0, 0, 0, 0.05);
+        }
+        
+        body {
+            background-color: var(--background-color);
+            color: var(--default-text-color);
+        }
+        
+        /* Apply body classes as soon as DOM is ready */
+        :root[data-theme="dark"] body {
+            background-color: var(--background-color);
+            color: var(--default-text-color);
+        }
+    </style>
+    
+    <!-- preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    
+        
+        
+        
+            <link rel="preconnect" href="https://evan.beee.top" crossorigin>
+        
+    
+    <!--- Seo Part-->
+    
+    <link rel="canonical" href="http://example.com/2025/09/11/typescript 类型操作符详解/"/>
+    <meta name="robots" content="index,follow">
+    <meta name="googlebot" content="index,follow">
+    <meta name="revisit-after" content="1 days">
+    
+    
+    
+        
+        <meta name="description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TypeScript 类型操作符详解">
+<meta property="og:url" content="http://example.com/2025/09/11/TypeScript%20%E7%B1%BB%E5%9E%8B%E6%93%8D%E4%BD%9C%E7%AC%A6%E8%AF%A6%E8%A7%A3/index.html">
+<meta property="og:site_name" content="Simon感觉有点奇怪">
+<meta property="og:description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/redefine-og.webp">
+<meta property="article:published_time" content="2025-09-11T03:48:11.000Z">
+<meta property="article:modified_time" content="2025-09-11T03:49:48.229Z">
+<meta property="article:author" content="Simon">
+<meta property="article:tag" content="TypeScript">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/redefine-og.webp">
+    
+    
+    <!--- Icon Part-->
+    <link rel="icon" type="image/png" href="/medias/simon_ico.svg" sizes="192x192">
+    <link rel="apple-touch-icon" sizes="180x180" href="/medias/simon_ico.svg">
+    <meta name="theme-color" content="#A31F34">
+    <link rel="shortcut icon" href="/medias/simon_ico.svg">
+    <!--- Page Info-->
+    
+    <title>
+        
+            TypeScript 类型操作符详解 | Simon觉得好奇怪
+        
+    </title>
+
+    <link rel="stylesheet" href="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/fonts/Chillax/chillax.css">
+
+    <!--- Inject Part-->
+    
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+        <link rel="stylesheet" href="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/css/build/tailwind.css">
+    
+
+    <link rel="stylesheet" href="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/fonts/GeistMono/geist-mono.css">
+    <link rel="stylesheet" href="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/fonts/Geist/geist.css">
+    <!--- Font Part-->
+    
+    
+    
+    
+    
+    
+        <script  src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/libs/anime.min.js" ></script>
+    
+
+    <script id="hexo-configurations">
+    window.config = {"hostname":"example.com","root":"/","language":"zh-CN","path":"search.json"};
+    window.theme = {"articles":{"style":{"font_size":"16px","line_height":1.5,"image_border_radius":"14px","image_alignment":"center","image_caption":false,"link_icon":true,"delete_mask":false,"title_alignment":"left","headings_top_spacing":{"h1":"3.2rem","h2":"2.4rem","h3":"1.9rem","h4":"1.6rem","h5":"1.4rem","h6":"1.3rem"}},"word_count":{"enable":true,"count":true,"min2read":true},"author_label":{"enable":true,"auto":false,"list":[]},"code_block":{"copy":true,"style":"mac","highlight_theme":{"light":"github","dark":"vs2015"},"font":{"enable":false,"family":null,"url":null}},"toc":{"enable":true,"max_depth":3,"number":false,"expand":true,"init_open":true},"copyright":{"enable":true,"default":"cc_by_nc_sa"},"lazyload":true,"pangu_js":false,"recommendation":{"enable":true,"title":"推荐阅读","limit":3,"mobile_limit":2,"placeholder":"/images/wallhaven-wqery6-light.webp","skip_dirs":[]}},"colors":{"primary":"#A31F34","secondary":null,"default_mode":"light"},"global":{"fonts":{"chinese":{"enable":false,"family":null,"url":null},"english":{"enable":false,"family":null,"url":null},"title":{"enable":false,"family":null,"url":null}},"content_max_width":"1000px","sidebar_width":"210px","hover":{"shadow":true,"scale":false},"scroll_progress":{"bar":true,"percentage":true},"website_counter":{"url":"https://cn.vercount.one/js","enable":true,"site_pv":true,"site_uv":true,"post_pv":true},"single_page":true,"preloader":{"enable":true,"custom_message":"陌上人如玉，公子世无双"},"side_tools":{"gear_rotation":true,"auto_expand":false},"open_graph":{"enable":true,"image":"/images/redefine-og.webp","description":"Hexo Theme Redefine, Redefine Your Hexo Journey."},"google_analytics":{"enable":false,"id":null}},"home_banner":{"enable":true,"style":"fixed","image":{"light":"/images/wallhaven-wqery6-light.webp","dark":"/images/wallhaven-wqery6-dark.webp"},"title":"Simon的展开领域","subtitle":{"text":["陌上人如玉，公子世无双","泥泞过后，渐闻花香"],"hitokoto":{"enable":false,"show_author":false,"api":"https://v1.hitokoto.cn"},"typing_speed":100,"backing_speed":80,"starting_delay":500,"backing_delay":1500,"loop":true,"smart_backspace":true},"text_color":{"light":"#fff","dark":"#d1d1b6"},"text_style":{"title_size":"2.8rem","subtitle_size":"1.5rem","line_height":1.2},"custom_font":{"enable":false,"family":null,"url":null},"social_links":{"enable":false,"style":"default","links":{"github":null,"instagram":null,"zhihu":null,"twitter":null,"email":null},"qrs":{"weixin":null}}},"plugins":{"feed":{"enable":false},"aplayer":{"enable":false,"type":"fixed","audios":[{"name":null,"artist":null,"url":null,"cover":null,"lrc":null}]},"mermaid":{"enable":true,"version":"11.4.1"}},"version":"2.8.5","navbar":{"auto_hide":true,"color":{"left":"#f78736","right":"#367df7","transparency":35},"width":{"home":"1200px","pages":"1000px"},"links":{"Home":{"path":"/","icon":"fa-regular fa-house"},"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Categories":{"icon":"fa-solid fa-folder","path":"/categories/"},"Tags":{"icon":"fa-solid fa-tags","path":"/tags/"},"About":{"icon":"fa-regular fa-user","submenus":{"Me":"http://simonicole.top","Github":"https://github.com/Simon-like"}}},"search":{"enable":true,"preload":true}},"page_templates":{"friends_column":2,"tags_style":"blur"},"home":{"sidebar":{"enable":true,"position":"left","first_item":"menu","announcement":null,"show_on_mobile":true,"links":{"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"}}},"article_date_format":"auto","excerpt_length":200,"categories":{"enable":true,"limit":3},"tags":{"enable":true,"limit":3}},"footerStart":"2025/6/18 12:00:00"};
+    window.lang_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"};
+    window.data = {"masonry":false};
+  </script>
+    
+    <!--- Fontawesome Part-->
+    <link rel="stylesheet" href="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/fontawesome/fontawesome.min.css">
+    <link rel="stylesheet" href="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/fontawesome/brands.min.css">
+    <link rel="stylesheet" href="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/fontawesome/solid.min.css">
+    <link rel="stylesheet" href="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/fontawesome/regular.min.css">
+    
+    
+    
+    
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+
+<body>
+	<div class="progress-bar-container">
+	
+	<span class="scroll-progress-bar"></span>
+	
+
+	
+	<span class="pjax-progress-bar"></span>
+	<!--        <span class="swup-progress-icon">-->
+	<!--            <i class="fa-solid fa-circle-notch fa-spin"></i>-->
+	<!--        </span>-->
+	
+</div>
+
+<style>
+    :root {
+        --preloader-background-color: #fff;
+        --preloader-text-color: #000;
+    }
+
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --preloader-background-color: #202124;
+            --preloader-text-color: #fff;
+        }
+    }
+
+    @media (prefers-color-scheme: light) {
+        :root {
+            --preloader-background-color: #fff;
+            --preloader-text-color: #000;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .ml13 {
+            font-size: 2.6rem !important; /* Adjust this value as needed */
+        }
+    }
+
+    .preloader {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem; /* Tailwind 'gap-4' is 1rem */
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        padding: 12px;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh; /* 'h-screen' is 100% of the viewport height */
+        background-color: var(--preloader-background-color);
+        z-index: 1100; /* 'z-[1100]' sets the z-index */
+        transition: opacity 0.2s ease-in-out;
+    }
+
+    .ml13 {
+        font-size: 3.2rem;
+        /* text-transform: uppercase; */
+        color: var(--preloader-text-color);
+        letter-spacing: -1px;
+        font-weight: 500;
+        font-family: 'Chillax-Variable', sans-serif;
+        text-align: center;
+    }
+
+    .ml13 .word {
+        display: inline-flex;
+        flex-wrap: wrap;
+        white-space: nowrap;
+    }
+
+    .ml13 .letter {
+        display: inline-block;
+        line-height: 1em;
+    }
+</style>
+
+<div class="preloader">
+    <h2 class="ml13">
+        陌上人如玉，公子世无双
+    </h2>
+    <script>
+        var textWrapper = document.querySelector('.ml13');
+        // Split text into words
+        var words = textWrapper.textContent.trim().split(' ');
+
+        // Clear the existing content
+        textWrapper.innerHTML = '';
+
+        // Wrap each word and its letters in spans
+        words.forEach(function(word) {
+            var wordSpan = document.createElement('span');
+            wordSpan.classList.add('word');
+            wordSpan.innerHTML = word.replace(/\S/g, "<span class='letter'>$&</span>");
+            textWrapper.appendChild(wordSpan);
+            textWrapper.appendChild(document.createTextNode(' ')); // Add space between words
+        });
+
+        var animation = anime.timeline({ loop: true })
+            .add({
+                targets: '.ml13 .letter',
+                translateY: [20, 0],
+                translateZ: 0,
+                opacity: [0, 1],
+                filter: ['blur(5px)', 'blur(0px)'],
+                easing: "easeOutExpo",
+                duration: 1200,
+                delay: (el, i) => 300 + 20 * i,
+            })
+            .add({
+                targets: '.ml13 .letter',
+                translateY: [0, -20],
+                opacity: [1, 0],
+                filter: ['blur(0px)', 'blur(5px)'],
+                easing: "easeInExpo",
+                duration: 1000,
+                delay: (el, i) => 15 * i,
+                complete: function() {
+                    hidePreloader();
+                }
+            }, '-=700');
+
+
+        let themeStatus = JSON.parse(localStorage.getItem('REDEFINE-THEME-STATUS'))?.isDark;
+
+        // If the theme status is not found in local storage, check the preferred color scheme
+        if (themeStatus === undefined || themeStatus === null) {
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                themeStatus = 'dark';
+            } else {
+                themeStatus = 'light';
+            }
+        }
+
+        // Now you can use the themeStatus variable in your code
+        if (themeStatus) {
+            document.documentElement.style.setProperty('--preloader-background-color', '#202124');
+            document.documentElement.style.setProperty('--preloader-text-color', '#fff');
+        } else {
+            document.documentElement.style.setProperty('--preloader-background-color', '#fff');
+            document.documentElement.style.setProperty('--preloader-text-color', '#000');
+        }
+
+        window.addEventListener('load', function () {
+            setTimeout(hidePreloader, 5000); // Call hidePreloader after 5000 milliseconds if not already called by animation
+        });
+
+        function hidePreloader() {
+            var preloader = document.querySelector('.preloader');
+            preloader.style.opacity = '0';
+            setTimeout(function () {
+                preloader.style.display = 'none';
+            }, 200);
+        }
+    </script>
+</div>
+
+<main class="page-container" id="swup">
+
+	
+
+	<div class="main-content-container flex flex-col justify-between min-h-dvh">
+		<div class="main-content-header">
+			<header class="navbar-container px-6 md:px-12">
+    <div class="navbar-content transition-navbar ">
+        <div class="left">
+            
+                <a class="logo-image h-8 w-8 sm:w-10 sm:h-10 mr-3" href="/">
+                    <img src="/medias/fufu_seek.png" class="w-full h-full rounded-xs">
+                </a>
+            
+            <a class="logo-title" href="/">
+                
+                Simon觉得好奇怪
+                
+            </a>
+        </div>
+
+        <div class="right">
+            <!-- PC -->
+            <div class="desktop">
+                <ul class="navbar-list">
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/"
+                                        >
+                                    <i class="fa-regular fa-house fa-fw"></i>
+                                    首页
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/archives"
+                                        >
+                                    <i class="fa-regular fa-archive fa-fw"></i>
+                                    归档
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/categories/"
+                                        >
+                                    <i class="fa-solid fa-folder fa-fw"></i>
+                                    分类
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/tags/"
+                                        >
+                                    <i class="fa-solid fa-tags fa-fw"></i>
+                                    标签
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class="has-dropdown"
+                                   href="#"
+                                        onClick=&#34;return false;&#34;>
+                                    <i class="fa-regular fa-user fa-fw"></i>
+                                    关于
+                                    <i class="fa-solid fa-chevron-down fa-fw"></i>
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                                    <ul class="sub-menu">
+                                        
+                                            <li>
+                                                <a target="_blank" rel="noopener" href="http://simonicole.top">
+                                                    ME
+                                                </a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a target="_blank" rel="noopener" href="https://github.com/Simon-like">
+                                                    GITHUB
+                                                </a>
+                                            </li>
+                                        
+                                    </ul>
+                                
+                            </li>
+                    
+                    
+                        <li class="navbar-item search search-popup-trigger">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <!-- Mobile -->
+            <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                
+                <div class="icon-item navbar-bar">
+                    <div class="navbar-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile sheet -->
+    <div class="navbar-drawer h-dvh w-full absolute top-0 left-0 bg-background-color flex flex-col justify-between">
+        <ul class="drawer-navbar-list flex flex-col px-4 justify-center items-start">
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/"
+                        >
+                            <span>
+                                首页
+                            </span>
+                            
+                                <i class="fa-regular fa-house fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/archives"
+                        >
+                            <span>
+                                归档
+                            </span>
+                            
+                                <i class="fa-regular fa-archive fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/categories/"
+                        >
+                            <span>
+                                分类
+                            </span>
+                            
+                                <i class="fa-solid fa-folder fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/tags/"
+                        >
+                            <span>
+                                标签
+                            </span>
+                            
+                                <i class="fa-solid fa-tags fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item-sub text-base my-1.5 flex flex-col w-full">
+                        
+                        <div class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary cursor-pointer text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                             navbar-data-toggle="submenu-About"
+                        >
+                            <span>
+                                关于
+                            </span>
+                            
+                                <i class="fa-solid fa-chevron-right fa-sm fa-fw transition-all"></i>
+                            
+                        </div>
+                        
+
+                        
+                            <div class="flex-col items-start px-2 py-2 hidden" data-target="submenu-About">
+                                
+                                    <div class="drawer-navbar-item text-base flex flex-col justify-center items-start hover:underline active:underline hover:underline-offset-1 rounded-3xl">
+                                        <a class=" text-third-text-color text-xl"
+                                           target="_blank" rel="noopener" href="http://simonicole.top">ME</a>
+                                    </div>
+                                
+                                    <div class="drawer-navbar-item text-base flex flex-col justify-center items-start hover:underline active:underline hover:underline-offset-1 rounded-3xl">
+                                        <a class=" text-third-text-color text-xl"
+                                           target="_blank" rel="noopener" href="https://github.com/Simon-like">GITHUB</a>
+                                    </div>
+                                
+                            </div>
+                        
+                    </li>
+            
+
+            
+            
+                
+                    
+                    
+                    
+            
+        </ul>
+
+        <div class="statistics flex justify-around my-2.5">
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/tags">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">24</div>
+        <div class="label text-third-text-color text-sm">标签</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/categories">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">3</div>
+        <div class="label text-third-text-color text-sm">分类</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">14</div>
+        <div class="label text-third-text-color text-sm">文章</div>
+    </a>
+</div>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+		</div>
+
+		<div class="main-content-body transition-fade-up">
+			
+
+			<div class="main-content">
+				<div class="post-page-container flex relative justify-between box-border w-full h-full">
+	<div class="article-content-container">
+
+		<div class="article-title relative w-full">
+			
+			<div class="w-full flex items-center pt-6 justify-start">
+				<h1 class="article-title-regular text-second-text-color tracking-tight text-4xl md:text-6xl font-semibold px-2 sm:px-6 md:px-8 py-3">TypeScript 类型操作符详解</h1>
+			</div>
+			
+		</div>
+
+		
+		<div class="article-header flex flex-row gap-2 items-center px-2 sm:px-6 md:px-8">
+			<div class="avatar w-[46px] h-[46px] flex-shrink-0 rounded-medium border border-border-color p-[1px]">
+				<img src="/medias/fufu_seek.png">
+			</div>
+			<div class="info flex flex-col justify-between">
+				<div class="author flex items-center">
+					<span class="name text-default-text-color text-lg font-semibold">Simon</span>
+					
+					<span class="author-label ml-1.5 text-xs px-2 py-0.5 rounded-small text-third-text-color border border-shadow-color-1">Lv2</span>
+					
+				</div>
+				<div class="meta-info">
+					<div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fa-regular fa-pen-fancy"></i>&nbsp;
+        <span class="desktop">2025-09-11 11:48:11</span>
+        <span class="mobile">2025-09-11 11:48:11</span>
+        <span class="hover-info">创建</span>
+    </span>
+    
+        <span class="article-date article-meta-item">
+            <i class="fa-regular fa-wrench"></i>&nbsp;
+            <span class="desktop">2025-09-11 11:49:48</span>
+            <span class="mobile">2025-09-11 11:49:48</span>
+            <span class="hover-info">更新</span>
+        </span>
+    
+
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fa-regular fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/TypeScript/">TypeScript</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+    
+    
+        <span class="article-pv article-meta-item">
+            <i class="fa-regular fa-eye"></i>&nbsp;<span id="busuanzi_value_page_pv"></span>
+        </span>
+    
+</div>
+
+				</div>
+			</div>
+		</div>
+		
+
+		
+
+
+		<div class="article-content markdown-body px-2 sm:px-6 md:px-8 pb-8">
+			<h2 id="1-typeof-操作符（类型查询操作符）"><a href="#1-typeof-操作符（类型查询操作符）" class="headerlink" title="1. typeof 操作符（类型查询操作符）"></a>1. <code>typeof</code> 操作符（类型查询操作符）</h2><h3 id="功能"><a href="#功能" class="headerlink" title="功能"></a>功能</h3><p>从 JavaScript 值中提取类型信息，获取变量、函数、对象等的类型。</p>
+<h3 id="定义实现"><a href="#定义实现" class="headerlink" title="定义实现"></a>定义实现</h3><div class="code-container" data-rel="Typescript"><figure class="iseeu highlight typescript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 语法：typeof expression</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">TypeOfResult</span> = <span class="keyword">typeof</span> someValue;</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="使用案例"><a href="#使用案例" class="headerlink" title="使用案例"></a>使用案例</h3><div class="code-container" data-rel="Typescript"><figure class="iseeu highlight typescript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 基础用法</span></span><br><span class="line"><span class="keyword">const</span> num = <span class="number">42</span>;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">NumType</span> = <span class="keyword">typeof</span> num; <span class="comment">// number</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> str = <span class="string">&quot;hello&quot;</span>;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">StrType</span> = <span class="keyword">typeof</span> str; <span class="comment">// string</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 对象类型提取</span></span><br><span class="line"><span class="keyword">const</span> config = &#123;</span><br><span class="line">  <span class="attr">apiUrl</span>: <span class="string">&quot;https://api.example.com&quot;</span>,</span><br><span class="line">  <span class="attr">timeout</span>: <span class="number">5000</span>,</span><br><span class="line">  <span class="attr">retries</span>: <span class="number">3</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">ConfigType</span> = <span class="keyword">typeof</span> config;</span><br><span class="line"><span class="comment">// &#123; apiUrl: string; timeout: number; retries: number &#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 函数类型提取</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">add</span>(<span class="params"><span class="attr">a</span>: <span class="built_in">number</span>, <span class="attr">b</span>: <span class="built_in">number</span></span>): <span class="built_in">number</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> a + b;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">AddFunctionType</span> = <span class="keyword">typeof</span> add;</span><br><span class="line"><span class="comment">// (a: number, b: number) =&gt; number</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 类构造函数类型</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">User</span> &#123;</span><br><span class="line">  <span class="title function_">constructor</span>(<span class="params"><span class="keyword">public</span> <span class="attr">name</span>: <span class="built_in">string</span>, <span class="keyword">public</span> <span class="attr">age</span>: <span class="built_in">number</span></span>) &#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">UserConstructor</span> = <span class="keyword">typeof</span> <span class="title class_">User</span>;</span><br><span class="line"><span class="comment">// new (name: string, age: number) =&gt; User</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 复杂对象</span></span><br><span class="line"><span class="keyword">const</span> api = &#123;</span><br><span class="line">  <span class="attr">users</span>: &#123;</span><br><span class="line">    <span class="attr">getAll</span>: <span class="function">() =&gt;</span> <span class="title class_">Promise</span>&lt;<span class="title class_">User</span>[]&gt;,</span><br><span class="line">    <span class="attr">getById</span>: <span class="function">(<span class="params"><span class="attr">id</span>: <span class="built_in">string</span></span>) =&gt;</span> <span class="title class_">Promise</span>&lt;<span class="title class_">User</span>&gt;</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">posts</span>: &#123;</span><br><span class="line">    <span class="attr">create</span>: <span class="function">(<span class="params"><span class="attr">data</span>: <span class="built_in">any</span></span>) =&gt;</span> <span class="title class_">Promise</span>&lt;<span class="built_in">void</span>&gt;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">ApiType</span> = <span class="keyword">typeof</span> api;</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="错误场景"><a href="#错误场景" class="headerlink" title="错误场景"></a>错误场景</h3><div class="code-container" data-rel="Typescript"><figure class="iseeu highlight typescript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// ❌ 错误：不能对类型使用 typeof</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">MyType</span> = &#123; <span class="attr">name</span>: <span class="built_in">string</span> &#125;;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">WrongUsage</span> = <span class="keyword">typeof</span> <span class="title class_">MyType</span>; <span class="comment">// Error: &#x27;MyType&#x27; only refers to a type, but is being used as a value</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// ❌ 错误：typeof 只能用于值</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">AnotherWrong</span> = <span class="keyword">typeof</span> <span class="built_in">string</span>; <span class="comment">// Error: &#x27;string&#x27; only refers to a type</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// ✅ 正确：对值使用 typeof</span></span><br><span class="line"><span class="keyword">const</span> <span class="attr">myValue</span>: <span class="title class_">MyType</span> = &#123; <span class="attr">name</span>: <span class="string">&quot;test&quot;</span> &#125;;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">CorrectUsage</span> = <span class="keyword">typeof</span> myValue; <span class="comment">// &#123; name: string &#125;</span></span><br></pre></td></tr></table></figure></div>
+
+<hr>
+<h2 id="2-keyof-操作符（键查询操作符）"><a href="#2-keyof-操作符（键查询操作符）" class="headerlink" title="2. keyof 操作符（键查询操作符）"></a>2. <code>keyof</code> 操作符（键查询操作符）</h2><h3 id="功能-1"><a href="#功能-1" class="headerlink" title="功能"></a>功能</h3><p>获取对象类型所有键的联合类型。</p>
+<h3 id="定义实现-1"><a href="#定义实现-1" class="headerlink" title="定义实现"></a>定义实现</h3><div class="code-container" data-rel="Typescript"><figure class="iseeu highlight typescript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 语法：keyof T</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">KeysOf</span>&lt;T&gt; = keyof T;</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="使用案例-1"><a href="#使用案例-1" class="headerlink" title="使用案例"></a>使用案例</h3><div class="code-container" data-rel="Typescript"><figure class="iseeu highlight typescript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 基础用法</span></span><br><span class="line"><span class="keyword">interface</span> <span class="title class_">Person</span> &#123;</span><br><span class="line">  <span class="attr">name</span>: <span class="built_in">string</span>;</span><br><span class="line">  <span class="attr">age</span>: <span class="built_in">number</span>;</span><br><span class="line">  <span class="attr">email</span>: <span class="built_in">string</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">PersonKeys</span> = keyof <span class="title class_">Person</span>; <span class="comment">// &quot;name&quot; | &quot;age&quot; | &quot;email&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 数组的键</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">ArrayKeys</span> = keyof <span class="built_in">string</span>[]; <span class="comment">// number | &quot;length&quot; | &quot;push&quot; | &quot;pop&quot; | ...</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 字符串的键</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">StringKeys</span> = keyof <span class="built_in">string</span>; <span class="comment">// number | &quot;charAt&quot; | &quot;charCodeAt&quot; | &quot;concat&quot; | ...</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 实际应用：类型安全的属性访问</span></span><br><span class="line"><span class="keyword">function</span> getProperty&lt;T, K <span class="keyword">extends</span> keyof T&gt;(<span class="attr">obj</span>: T, <span class="attr">key</span>: K): T[K] &#123;</span><br><span class="line">  <span class="keyword">return</span> obj[key];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="attr">person</span>: <span class="title class_">Person</span> = &#123; <span class="attr">name</span>: <span class="string">&quot;Alice&quot;</span>, <span class="attr">age</span>: <span class="number">30</span>, <span class="attr">email</span>: <span class="string">&quot;alice@example.com&quot;</span> &#125;;</span><br><span class="line"><span class="keyword">const</span> name = <span class="title function_">getProperty</span>(person, <span class="string">&quot;name&quot;</span>); <span class="comment">// string</span></span><br><span class="line"><span class="keyword">const</span> age = <span class="title function_">getProperty</span>(person, <span class="string">&quot;age&quot;</span>); <span class="comment">// number</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 动态属性名</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">DynamicKeys</span> = keyof &#123; [<span class="attr">key</span>: <span class="built_in">string</span>]: <span class="built_in">any</span> &#125;; <span class="comment">// string | number</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 与映射类型结合</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Optional</span>&lt;T&gt; = &#123;</span><br><span class="line">  [K <span class="keyword">in</span> keyof T]?: T[K];</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">OptionalPerson</span> = <span class="title class_">Optional</span>&lt;<span class="title class_">Person</span>&gt;;</span><br><span class="line"><span class="comment">// &#123; name?: string; age?: number; email?: string &#125;</span></span><br></pre></td></tr></table></figure></div>
+
+<h3 id="错误场景-1"><a href="#错误场景-1" class="headerlink" title="错误场景"></a>错误场景</h3><div class="code-container" data-rel="Typescript"><figure class="iseeu highlight typescript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// ❌ 错误：keyof 只能用于类型</span></span><br><span class="line"><span class="keyword">const</span> obj = &#123; <span class="attr">a</span>: <span class="number">1</span>, <span class="attr">b</span>: <span class="number">2</span> &#125;;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Wrong</span> = keyof obj; <span class="comment">// Error: &#x27;obj&#x27; refers to a value, but is being used as a type</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// ✅ 正确：使用 typeof 先获取类型</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Correct</span> = keyof <span class="keyword">typeof</span> obj; <span class="comment">// &quot;a&quot; | &quot;b&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// ❌ 错误：keyof 用于非对象类型</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">PrimitiveKeys</span> = keyof <span class="built_in">number</span>; <span class="comment">// 实际上这是可以的，返回 number 原型上的方法名</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">NeverKeys</span> = keyof <span class="built_in">never</span>; <span class="comment">// never</span></span><br></pre></td></tr></table></figure></div>
+
+<hr>
+<h2 id="3-extends-操作符（条件类型操作符）"><a href="#3-extends-操作符（条件类型操作符）" class="headerlink" title="3. extends 操作符（条件类型操作符）"></a>3. <code>extends</code> 操作符（条件类型操作符）</h2><h3 id="功能-2"><a href="#功能-2" class="headerlink" title="功能"></a>功能</h3><p>用于条件类型判断和泛型约束，判断一个类型是否可以赋值给另一个类型。也可以理解为，判断前者是否是后者的子类型，比如“a”就是string的子类型。</p>
+<ul>
+<li>为泛型做类型限制</li>
+<li>类的继承</li>
+<li>三元运算符（子类型判断）</li>
+</ul>
+<h3 id="定义实现-2"><a href="#定义实现-2" class="headerlink" title="定义实现"></a>定义实现</h3><div class="code-container" data-rel="Typescript"><figure class="iseeu highlight typescript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 条件类型语法：T extends U ? X : Y</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Conditional</span>&lt;T, U, X, Y&gt; = T <span class="keyword">extends</span> U ? X : Y;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 泛型约束语法：&lt;T extends U&gt;</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Constrained</span>&lt;T <span class="keyword">extends</span> <span class="title class_">SomeType</span>&gt; = T;</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="使用案例-2"><a href="#使用案例-2" class="headerlink" title="使用案例"></a>使用案例</h3><div class="code-container" data-rel="Typescript"><figure class="iseeu highlight typescript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 基础条件类型</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">IsString</span>&lt;T&gt; = T <span class="keyword">extends</span> <span class="built_in">string</span> ? <span class="literal">true</span> : <span class="literal">false</span>;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Test1</span> = <span class="title class_">IsString</span>&lt;<span class="built_in">string</span>&gt;; <span class="comment">// true</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Test2</span> = <span class="title class_">IsString</span>&lt;<span class="built_in">number</span>&gt;; <span class="comment">// false</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 泛型约束</span></span><br><span class="line"><span class="keyword">interface</span> <span class="title class_">Lengthwise</span> &#123;</span><br><span class="line">  <span class="attr">length</span>: <span class="built_in">number</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">function</span> loggingIdentity&lt;T <span class="keyword">extends</span> <span class="title class_">Lengthwise</span>&gt;(<span class="attr">arg</span>: T): T &#123;</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(arg.<span class="property">length</span>); <span class="comment">// 现在可以访问 length 属性</span></span><br><span class="line">  <span class="keyword">return</span> arg;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">function</span> cpmpare&lt;T <span class="keyword">extends</span> &#123;<span class="attr">length</span>: <span class="built_in">number</span>&#125;&gt;(<span class="attr">a</span>:T, <span class="attr">b</span>:T)&#123;</span><br><span class="line">  <span class="keyword">return</span> a.<span class="property">length</span> &gt;= b.<span class="property">length</span> ? a : b;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 复杂条件类型</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">NonNullable</span>&lt;T&gt; = T <span class="keyword">extends</span> <span class="literal">null</span> | <span class="literal">undefined</span> ? <span class="built_in">never</span> : T;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Result</span> = <span class="title class_">NonNullable</span>&lt;<span class="built_in">string</span> | <span class="literal">null</span> | <span class="literal">undefined</span>&gt;; <span class="comment">// string</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 分布式条件类型</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">ToArray</span>&lt;T&gt; = T <span class="keyword">extends</span> <span class="built_in">any</span> ? T[] : <span class="built_in">never</span>;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Arrays</span> = <span class="title class_">ToArray</span>&lt;<span class="built_in">string</span> | <span class="built_in">number</span>&gt;; <span class="comment">// string[] | number[]</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 嵌套条件类型</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">DeepReadonly</span>&lt;T&gt; = &#123;</span><br><span class="line">  <span class="keyword">readonly</span> [P <span class="keyword">in</span> keyof T]: T[P] <span class="keyword">extends</span> <span class="built_in">object</span></span><br><span class="line">    ? T[P] <span class="keyword">extends</span> <span class="title class_">Function</span></span><br><span class="line">      ? T[P]</span><br><span class="line">      : <span class="title class_">DeepReadonly</span>&lt;T[P]&gt;</span><br><span class="line">    : T[P];</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// 实际应用：类型过滤</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">FilterByType</span>&lt;T, U&gt; = &#123;</span><br><span class="line">  [K <span class="keyword">in</span> keyof T]: T[K] <span class="keyword">extends</span> U ? K : <span class="built_in">never</span>;</span><br><span class="line">&#125;[keyof T];</span><br><span class="line"></span><br><span class="line"><span class="keyword">interface</span> <span class="title class_">Mixed</span> &#123;</span><br><span class="line">  <span class="attr">name</span>: <span class="built_in">string</span>;</span><br><span class="line">  <span class="attr">age</span>: <span class="built_in">number</span>;</span><br><span class="line">  <span class="attr">isActive</span>: <span class="built_in">boolean</span>;</span><br><span class="line">  <span class="attr">callback</span>: <span class="function">() =&gt;</span> <span class="built_in">void</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">StringKeys</span> = <span class="title class_">FilterByType</span>&lt;<span class="title class_">Mixed</span>, <span class="built_in">string</span>&gt;; <span class="comment">// &quot;name&quot;</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">FunctionKeys</span> = <span class="title class_">FilterByType</span>&lt;<span class="title class_">Mixed</span>, <span class="title class_">Function</span>&gt;; <span class="comment">// &quot;callback&quot;</span></span><br></pre></td></tr></table></figure></div>
+
+<h3 id="错误场景-2"><a href="#错误场景-2" class="headerlink" title="错误场景"></a>错误场景</h3><div class="code-container" data-rel="Typescript"><figure class="iseeu highlight typescript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// ❌ 错误：extends 用于值而非类型</span></span><br><span class="line"><span class="keyword">const</span> value = <span class="string">&quot;hello&quot;</span>;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Wrong</span> = value <span class="keyword">extends</span> <span class="built_in">string</span> ? <span class="literal">true</span> : <span class="literal">false</span>; <span class="comment">// Error</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// ❌ 错误：条件类型语法错误</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">BadSyntax</span>&lt;T&gt; = T <span class="keyword">extends</span> <span class="built_in">string</span>; <span class="comment">// Error: 条件类型需要 ? :</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// ❌ 错误：泛型约束循环引用</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">SelfReferencing</span>&lt;T <span class="keyword">extends</span> T&gt; = T; <span class="comment">// Error: 类型参数 &#x27;T&#x27; 有循环约束</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// ✅ 正确用法</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Correct</span>&lt;T&gt; = T <span class="keyword">extends</span> <span class="built_in">string</span> ? <span class="literal">true</span> : <span class="literal">false</span>;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">CorrectConstraint</span>&lt;T <span class="keyword">extends</span> <span class="built_in">string</span>&gt; = T;</span><br></pre></td></tr></table></figure></div>
+
+<p>分布式条件类型vs非分布式类型参数</p>
+<div class="code-container" data-rel="Typescript"><figure class="iseeu highlight typescript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 情况1：分布式条件类型（有裸类型参数）</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Distributive</span>&lt;T&gt; = T <span class="keyword">extends</span> <span class="string">&#x27;a&#x27;</span> ? <span class="string">&#x27;yes&#x27;</span> : <span class="string">&#x27;no&#x27;</span>;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Result1</span> = <span class="title class_">Distributive</span>&lt;<span class="string">&#x27;a&#x27;</span> | <span class="string">&#x27;b&#x27;</span> | <span class="string">&#x27;c&#x27;</span>&gt;; <span class="comment">// &#x27;yes&#x27; | &#x27;no&#x27; | &#x27;no&#x27; = &#x27;yes&#x27; | &#x27;no&#x27;</span></span><br><span class="line"><span class="comment">// TypeScript 实际上会这样处理：</span></span><br><span class="line"><span class="comment">// 1. 检测到 T 是裸类型参数</span></span><br><span class="line"><span class="comment">// 2. 将联合类型分布到每个成员：</span></span><br><span class="line"><span class="comment">//    - Exclude&lt;&#x27;a&#x27;, &#x27;a&#x27;&gt; = &#x27;a&#x27; extends &#x27;a&#x27; ? never : &#x27;a&#x27; = never</span></span><br><span class="line"><span class="comment">//    - Exclude&lt;&#x27;b&#x27;, &#x27;a&#x27;&gt; = &#x27;b&#x27; extends &#x27;a&#x27; ? never : &#x27;b&#x27; = &#x27;b&#x27;  </span></span><br><span class="line"><span class="comment">//    - Exclude&lt;&#x27;c&#x27;, &#x27;a&#x27;&gt; = &#x27;c&#x27; extends &#x27;a&#x27; ? never : &#x27;c&#x27; = &#x27;c&#x27;</span></span><br><span class="line"><span class="comment">// 3. 合并结果：never | &#x27;b&#x27; | &#x27;c&#x27; = &#x27;b&#x27; | &#x27;c&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 情况2：非分布式条件类型（没有裸类型参数）</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">NonDistributive</span> = <span class="string">&#x27;a&#x27;</span> | <span class="string">&#x27;b&#x27;</span> | <span class="string">&#x27;c&#x27;</span> <span class="keyword">extends</span> <span class="string">&#x27;a&#x27;</span> ? <span class="string">&#x27;yes&#x27;</span> : <span class="string">&#x27;no&#x27;</span>; <span class="comment">// &#x27;no&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 情况3：阻止分布式行为</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">PreventDistribution</span>&lt;T&gt; = [T] <span class="keyword">extends</span> [<span class="string">&#x27;a&#x27;</span>] ? <span class="string">&#x27;yes&#x27;</span> : <span class="string">&#x27;no&#x27;</span>;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Result3</span> = <span class="title class_">PreventDistribution</span>&lt;<span class="string">&#x27;a&#x27;</span> | <span class="string">&#x27;b&#x27;</span> | <span class="string">&#x27;c&#x27;</span>&gt;; <span class="comment">// &#x27;no&#x27;</span></span><br></pre></td></tr></table></figure></div>
+
+<hr>
+<h2 id="4-infer-操作符（类型推断操作符）"><a href="#4-infer-操作符（类型推断操作符）" class="headerlink" title="4. infer 操作符（类型推断操作符）"></a>4. <code>infer</code> 操作符（类型推断操作符）</h2><h3 id="功能-3"><a href="#功能-3" class="headerlink" title="功能"></a>功能</h3><p>在条件类型中推断类型，只能在条件类型的 extends 子句中使用。可以类比设参数列方程，只不过ts自动帮我们解方程。</p>
+<h3 id="定义实现-3"><a href="#定义实现-3" class="headerlink" title="定义实现"></a>定义实现</h3><div class="code-container" data-rel="Typescript"><figure class="iseeu highlight typescript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 语法：T extends SomeType&lt;infer U&gt; ? U : never</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">InferExample</span>&lt;T&gt; = T <span class="keyword">extends</span> <span class="title class_">SomeType</span>&lt;infer U&gt; ? U : <span class="built_in">never</span>;</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="使用案例-3"><a href="#使用案例-3" class="headerlink" title="使用案例"></a>使用案例</h3><div class="code-container" data-rel="Typescript"><figure class="iseeu highlight typescript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 推断函数返回类型</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">MyReturnType</span>&lt;T&gt; = T <span class="title function_">extends</span> (...<span class="attr">args</span>: <span class="built_in">any</span>[]) =&gt; infer R ? R : <span class="built_in">never</span>;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">FuncReturn</span> = <span class="title class_">MyReturnType</span>&lt;<span class="function">() =&gt;</span> <span class="built_in">string</span>&gt;; <span class="comment">// string</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">FuncReturn2</span> = <span class="title class_">MyReturnType</span>&lt;<span class="function">(<span class="params"><span class="attr">x</span>: <span class="built_in">number</span></span>) =&gt;</span> <span class="built_in">boolean</span>&gt;; <span class="comment">// boolean</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 推断函数参数类型</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">FirstParameter</span>&lt;T&gt; = T <span class="title function_">extends</span> (<span class="attr">first</span>: infer P, ...<span class="attr">args</span>: <span class="built_in">any</span>[]) =&gt; <span class="built_in">any</span> ? P : <span class="built_in">never</span>;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">FirstParam</span> = <span class="title class_">FirstParameter</span>&lt;<span class="function">(<span class="params"><span class="attr">a</span>: <span class="built_in">string</span>, <span class="attr">b</span>: <span class="built_in">number</span></span>) =&gt;</span> <span class="built_in">void</span>&gt;; <span class="comment">// string</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 推断数组元素类型</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">ArrayElement</span>&lt;T&gt; = T <span class="title function_">extends</span> (infer U)[] ? U : <span class="built_in">never</span>;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Element</span> = <span class="title class_">ArrayElement</span>&lt;<span class="built_in">string</span>[]&gt;; <span class="comment">// string</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 返回嵌套Promise的值,若要支持thenable对象，可以使用PromiseLike</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">MyAwaited</span>&lt;T&gt; = T <span class="keyword">extends</span> <span class="title class_">Promise</span>&lt;infer K&gt; ?</span><br><span class="line">	K <span class="keyword">extends</span> <span class="title class_">Promise</span>&lt;<span class="built_in">any</span>&gt; ? <span class="title class_">MyAwaited</span>&lt;K&gt; : K : <span class="built_in">unknown</span>;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Resolved</span> = <span class="title class_">MyAwaited</span>&lt;<span class="title class_">Promise</span>&lt;<span class="built_in">string</span>&gt;&gt;; <span class="comment">// string</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 推断对象属性类型</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">PropertyType</span>&lt;T, K <span class="keyword">extends</span> keyof T&gt; = T <span class="keyword">extends</span> &#123; [P <span class="keyword">in</span> K]: infer V &#125; ? V : <span class="built_in">never</span>;</span><br><span class="line"><span class="keyword">interface</span> <span class="title class_">User</span> &#123;</span><br><span class="line">  <span class="attr">name</span>: <span class="built_in">string</span>;</span><br><span class="line">  <span class="attr">age</span>: <span class="built_in">number</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">NameType</span> = <span class="title class_">PropertyType</span>&lt;<span class="title class_">User</span>, <span class="string">&quot;name&quot;</span>&gt;; <span class="comment">// string</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 复杂推断：元组类型</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Head</span>&lt;T&gt; = T <span class="keyword">extends</span> [infer H, ...<span class="built_in">any</span>[]] ? H : <span class="built_in">never</span>;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Tail</span>&lt;T&gt; = T <span class="keyword">extends</span> [<span class="built_in">any</span>, ...infer T] ? T : <span class="built_in">never</span>;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">HeadResult</span> = <span class="title class_">Head</span>&lt;[<span class="built_in">string</span>, <span class="built_in">number</span>, <span class="built_in">boolean</span>]&gt;; <span class="comment">// string</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">TailResult</span> = <span class="title class_">Tail</span>&lt;[<span class="built_in">string</span>, <span class="built_in">number</span>, <span class="built_in">boolean</span>]&gt;; <span class="comment">// [number, boolean]</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 推断构造函数参数</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">ConstructorParameters</span>&lt;T&gt; = T <span class="keyword">extends</span> <span class="title function_">new</span> (...<span class="attr">args</span>: infer P) =&gt; <span class="built_in">any</span> ? P : <span class="built_in">never</span>;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">MyClass</span> &#123;</span><br><span class="line">  <span class="title function_">constructor</span>(<span class="params"><span class="attr">name</span>: <span class="built_in">string</span>, <span class="attr">age</span>: <span class="built_in">number</span></span>) &#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">MyClassParams</span> = <span class="title class_">ConstructorParameters</span>&lt;<span class="keyword">typeof</span> <span class="title class_">MyClass</span>&gt;; <span class="comment">// [string, number]</span></span><br></pre></td></tr></table></figure></div>
+
+<h3 id="错误场景-3"><a href="#错误场景-3" class="headerlink" title="错误场景"></a>错误场景</h3><div class="code-container" data-rel="Typescript"><figure class="iseeu highlight typescript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// ❌ 错误：infer 只能在条件类型中使用</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Wrong</span>&lt;T&gt; = infer U; <span class="comment">// Error: &#x27;infer&#x27; declarations are only permitted in the &#x27;extends&#x27; clause of a conditional type</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// ❌ 错误：infer 不在 extends 子句中</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">AlsoWrong</span>&lt;T&gt; = T <span class="keyword">extends</span> <span class="built_in">string</span> ? infer U : <span class="built_in">never</span>; <span class="comment">// Error: &#x27;infer&#x27; 必须在 extends 子句中</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// ❌ 错误：infer 变量重复声明</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Duplicate</span>&lt;T&gt; = T <span class="keyword">extends</span> [infer U, infer U] ? U : <span class="built_in">never</span>; <span class="comment">// Error: 重复的标识符 &#x27;U&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// ✅ 正确用法</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Correct</span>&lt;T&gt; = T <span class="keyword">extends</span> [infer U, infer V] ? [U, V] : <span class="built_in">never</span>;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">CorrectUsage</span>&lt;T&gt; = T <span class="title function_">extends</span> (...<span class="attr">args</span>: <span class="built_in">any</span>[]) =&gt; infer R ? R : <span class="built_in">never</span>;</span><br></pre></td></tr></table></figure></div>
+
+<hr>
+<h2 id="5-in-操作符（映射类型操作符）"><a href="#5-in-操作符（映射类型操作符）" class="headerlink" title="5. in 操作符（映射类型操作符）"></a>5. <code>in</code> 操作符（映射类型操作符）</h2><h3 id="功能-4"><a href="#功能-4" class="headerlink" title="功能"></a>功能</h3><p>在映射类型中遍历联合类型的每个成员，创建新的对象类型。</p>
+<h3 id="定义实现-4"><a href="#定义实现-4" class="headerlink" title="定义实现"></a>定义实现</h3><div class="code-container" data-rel="Typescript"><figure class="iseeu highlight typescript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 语法：&#123; [K in Keys]: ValueType &#125;</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">MappedType</span>&lt;T&gt; = &#123;</span><br><span class="line">  [K <span class="keyword">in</span> keyof T]: T[K];</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="使用案例-4"><a href="#使用案例-4" class="headerlink" title="使用案例"></a>使用案例</h3><div class="code-container" data-rel="Typescript"><figure class="iseeu highlight typescript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 基础映射类型</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">MyPartial</span>&lt;T&gt; = &#123;</span><br><span class="line">  [P <span class="keyword">in</span> keyof T]?: T[P];</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">interface</span> <span class="title class_">User</span> &#123;</span><br><span class="line">  <span class="attr">name</span>: <span class="built_in">string</span>;</span><br><span class="line">  <span class="attr">age</span>: <span class="built_in">number</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">PartialUser</span> = <span class="title class_">MyPartial</span>&lt;<span class="title class_">User</span>&gt;; <span class="comment">// &#123; name?: string; age?: number &#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 映射联合类型</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">StringKeys</span> = <span class="string">&quot;name&quot;</span> | <span class="string">&quot;age&quot;</span> | <span class="string">&quot;email&quot;</span>;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">StringObject</span> = &#123;</span><br><span class="line">  [K <span class="keyword">in</span> <span class="title class_">StringKeys</span>]: <span class="built_in">string</span>;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">// &#123; name: string; age: string; email: string &#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 添加修饰符</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">MyReadonly</span>&lt;T&gt; = &#123;</span><br><span class="line">  <span class="keyword">readonly</span> [P <span class="keyword">in</span> keyof T]: T[P];</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">ReadonlyUser</span> = <span class="title class_">MyReadonly</span>&lt;<span class="title class_">User</span>&gt;; <span class="comment">// &#123; readonly name: string; readonly age: number &#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 移除修饰符</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Mutable</span>&lt;T&gt; = &#123;</span><br><span class="line">  -<span class="keyword">readonly</span> [P <span class="keyword">in</span> keyof T]: T[P];</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Required</span>&lt;T&gt; = &#123;</span><br><span class="line">  [P <span class="keyword">in</span> keyof T]-?: T[P];</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 条件映射</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">NullableKeys</span>&lt;T&gt; = &#123;</span><br><span class="line">  [K <span class="keyword">in</span> keyof T]: T[K] <span class="keyword">extends</span> <span class="literal">null</span> ? K : <span class="built_in">never</span>;</span><br><span class="line">&#125;[keyof T];</span><br><span class="line"></span><br><span class="line"><span class="keyword">interface</span> <span class="title class_">Mixed</span> &#123;</span><br><span class="line">  <span class="attr">name</span>: <span class="built_in">string</span>;</span><br><span class="line">  <span class="attr">age</span>: <span class="built_in">number</span> | <span class="literal">null</span>;</span><br><span class="line">  <span class="attr">email</span>: <span class="built_in">string</span> | <span class="literal">null</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">NullableFields</span> = <span class="title class_">NullableKeys</span>&lt;<span class="title class_">Mixed</span>&gt;; <span class="comment">// &quot;age&quot; | &quot;email&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 实际应用：API 响应类型转换</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">ApiResponse</span>&lt;T&gt; = &#123;</span><br><span class="line">  [K <span class="keyword">in</span> keyof T]: &#123;</span><br><span class="line">    <span class="attr">data</span>: T[K];</span><br><span class="line">    <span class="attr">loading</span>: <span class="built_in">boolean</span>;</span><br><span class="line">    <span class="attr">error</span>: <span class="built_in">string</span> | <span class="literal">null</span>;</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">interface</span> <span class="title class_">UserData</span> &#123;</span><br><span class="line">  <span class="attr">profile</span>: <span class="title class_">User</span>;</span><br><span class="line">  <span class="attr">posts</span>: <span class="title class_">Post</span>[];</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">UserApiState</span> = <span class="title class_">ApiResponse</span>&lt;<span class="title class_">UserData</span>&gt;;</span><br><span class="line"><span class="comment">// &#123;</span></span><br><span class="line"><span class="comment">//   profile: &#123; data: User; loading: boolean; error: string | null &#125;;</span></span><br><span class="line"><span class="comment">//   posts: &#123; data: Post[]; loading: boolean; error: string | null &#125;;</span></span><br><span class="line"><span class="comment">// &#125;</span></span><br></pre></td></tr></table></figure></div>
+
+<h3 id="错误场景-4"><a href="#错误场景-4" class="headerlink" title="错误场景"></a>错误场景</h3><div class="code-container" data-rel="Typescript"><figure class="iseeu highlight typescript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// ❌ 错误：in 只能用于映射类型</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Wrong</span> = <span class="string">&quot;name&quot;</span> <span class="keyword">in</span> <span class="title class_">User</span>; <span class="comment">// Error: &#x27;in&#x27; 只能在映射类型中使用</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// ❌ 错误：映射类型语法错误</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">BadSyntax</span>&lt;T&gt; = &#123;</span><br><span class="line">  [K <span class="keyword">in</span> T]: <span class="built_in">string</span>; <span class="comment">// Error: 如果 T 不是联合类型可能出错</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ❌ 错误：映射非联合类型</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">MapNumber</span> = &#123;</span><br><span class="line">  [K <span class="keyword">in</span> <span class="built_in">number</span>]: <span class="built_in">string</span>; <span class="comment">// Error: &#x27;number&#x27; 不是有效的映射类型键</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ✅ 正确用法</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Correct</span>&lt;T&gt; = &#123;</span><br><span class="line">  [K <span class="keyword">in</span> keyof T]: T[K];</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></div>
+
+<hr>
+<h2 id="6-as-操作符（键重映射操作符）"><a href="#6-as-操作符（键重映射操作符）" class="headerlink" title="6. as 操作符（键重映射操作符）"></a>6. <code>as</code> 操作符（键重映射操作符）</h2><h3 id="功能-5"><a href="#功能-5" class="headerlink" title="功能"></a>功能</h3><p>在映射类型中重新映射键名，可以改变属性名称。</p>
+<h3 id="定义实现-5"><a href="#定义实现-5" class="headerlink" title="定义实现"></a>定义实现</h3><div class="code-container" data-rel="Typescript"><figure class="iseeu highlight typescript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 语法：&#123; [K in keyof T as NewKeyType]: ValueType &#125;</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">RemappedType</span>&lt;T&gt; = &#123;</span><br><span class="line">  [K <span class="keyword">in</span> keyof T <span class="keyword">as</span> <span class="string">`new_<span class="subst">$&#123;<span class="built_in">string</span> &amp; K&#125;</span>`</span>]: T[K];</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="使用案例-5"><a href="#使用案例-5" class="headerlink" title="使用案例"></a>使用案例</h3><div class="code-container" data-rel="Typescript"><figure class="iseeu highlight typescript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 基础键重映射</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Getters</span>&lt;T&gt; = &#123;</span><br><span class="line">  [K <span class="keyword">in</span> keyof T <span class="keyword">as</span> <span class="string">`get<span class="subst">$&#123;Capitalize&lt;<span class="built_in">string</span> &amp; K&gt;&#125;</span>`</span>]: <span class="function">() =&gt;</span> T[K];</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">interface</span> <span class="title class_">User</span> &#123;</span><br><span class="line">  <span class="attr">name</span>: <span class="built_in">string</span>;</span><br><span class="line">  <span class="attr">age</span>: <span class="built_in">number</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">UserGetters</span> = <span class="title class_">Getters</span>&lt;<span class="title class_">User</span>&gt;;</span><br><span class="line"><span class="comment">// &#123; getName: () =&gt; string; getAge: () =&gt; number &#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 条件键重映射</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">PickByType</span>&lt;T, U&gt; = &#123;</span><br><span class="line">  [K <span class="keyword">in</span> keyof T <span class="keyword">as</span> T[K] <span class="keyword">extends</span> U ? K : <span class="built_in">never</span>]: T[K];</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">interface</span> <span class="title class_">Mixed</span> &#123;</span><br><span class="line">  <span class="attr">name</span>: <span class="built_in">string</span>;</span><br><span class="line">  <span class="attr">age</span>: <span class="built_in">number</span>;</span><br><span class="line">  <span class="attr">isActive</span>: <span class="built_in">boolean</span>;</span><br><span class="line">  <span class="attr">callback</span>: <span class="function">() =&gt;</span> <span class="built_in">void</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">StringProps</span> = <span class="title class_">PickByType</span>&lt;<span class="title class_">Mixed</span>, <span class="built_in">string</span>&gt;; <span class="comment">// &#123; name: string &#125;</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">FunctionProps</span> = <span class="title class_">PickByType</span>&lt;<span class="title class_">Mixed</span>, <span class="title class_">Function</span>&gt;; <span class="comment">// &#123; callback: () =&gt; void &#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 复杂重映射：添加前缀后缀</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">EventHandlers</span>&lt;T&gt; = &#123;</span><br><span class="line">  [K <span class="keyword">in</span> keyof T <span class="keyword">as</span> <span class="string">`on<span class="subst">$&#123;Capitalize&lt;<span class="built_in">string</span> &amp; K&gt;&#125;</span>Changed`</span>]: <span class="function">(<span class="params"><span class="attr">value</span>: T[K]</span>) =&gt;</span> <span class="built_in">void</span>;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">UserEventHandlers</span> = <span class="title class_">EventHandlers</span>&lt;<span class="title class_">User</span>&gt;;</span><br><span class="line"><span class="comment">// &#123; onNameChanged: (value: string) =&gt; void; onAgeChanged: (value: number) =&gt; void &#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 过滤和转换</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">NonFunctionPropertyNames</span>&lt;T&gt; = &#123;</span><br><span class="line">  [K <span class="keyword">in</span> keyof T]: T[K] <span class="keyword">extends</span> <span class="title class_">Function</span> ? <span class="built_in">never</span> : K;</span><br><span class="line">&#125;[keyof T];</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">NonFunctionProperties</span>&lt;T&gt; = &#123;</span><br><span class="line">  [K <span class="keyword">in</span> <span class="title class_">NonFunctionPropertyNames</span>&lt;T&gt;]: T[K];</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 实际应用：表单状态管理</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">FormState</span>&lt;T&gt; = &#123;</span><br><span class="line">  [K <span class="keyword">in</span> keyof T <span class="keyword">as</span> <span class="string">`<span class="subst">$&#123;<span class="built_in">string</span> &amp; K&#125;</span>State`</span>]: &#123;</span><br><span class="line">    <span class="attr">value</span>: T[K];</span><br><span class="line">    <span class="attr">error</span>: <span class="built_in">string</span> | <span class="literal">null</span>;</span><br><span class="line">    <span class="attr">touched</span>: <span class="built_in">boolean</span>;</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">interface</span> <span class="title class_">LoginForm</span> &#123;</span><br><span class="line">  <span class="attr">username</span>: <span class="built_in">string</span>;</span><br><span class="line">  <span class="attr">password</span>: <span class="built_in">string</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">LoginFormState</span> = <span class="title class_">FormState</span>&lt;<span class="title class_">LoginForm</span>&gt;;</span><br><span class="line"><span class="comment">// &#123;</span></span><br><span class="line"><span class="comment">//   usernameState: &#123; value: string; error: string | null; touched: boolean &#125;;</span></span><br><span class="line"><span class="comment">//   passwordState: &#123; value: string; error: string | null; touched: boolean &#125;;</span></span><br><span class="line"><span class="comment">// &#125;</span></span><br></pre></td></tr></table></figure></div>
+
+<h3 id="错误场景-5"><a href="#错误场景-5" class="headerlink" title="错误场景"></a>错误场景</h3><div class="code-container" data-rel="Typescript"><figure class="iseeu highlight typescript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// ❌ 错误：as 用于非映射类型</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Wrong</span> = <span class="built_in">string</span> <span class="keyword">as</span> <span class="built_in">number</span>; <span class="comment">// Error: 这是类型断言，不是键重映射</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// ❌ 错误：as 重映射语法错误</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">BadSyntax</span>&lt;T&gt; = &#123;</span><br><span class="line">  [K <span class="keyword">in</span> keyof T]: T[K] <span class="keyword">as</span> <span class="built_in">string</span>; <span class="comment">// Error: as 应该用于键，不是值</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ❌ 错误：重映射到非有效键类型</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">InvalidKey</span>&lt;T&gt; = &#123;</span><br><span class="line">  [K <span class="keyword">in</span> keyof T <span class="keyword">as</span> T[K]]: <span class="built_in">string</span>; <span class="comment">// Error: T[K] 可能不是有效的键类型</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ✅ 正确用法</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Correct</span>&lt;T&gt; = &#123;</span><br><span class="line">  [K <span class="keyword">in</span> keyof T <span class="keyword">as</span> <span class="string">`prefix_<span class="subst">$&#123;<span class="built_in">string</span> &amp; K&#125;</span>`</span>]: T[K];</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></div>
+
+<hr>
+<h2 id="7-操作符（索引访问操作符）"><a href="#7-操作符（索引访问操作符）" class="headerlink" title="7. [] 操作符（索引访问操作符）"></a>7. <code>[]</code> 操作符（索引访问操作符）</h2><h3 id="功能-6"><a href="#功能-6" class="headerlink" title="功能"></a>功能</h3><p>通过索引获取对象类型的属性类型或数组类型的元素类型。</p>
+<h3 id="定义实现-6"><a href="#定义实现-6" class="headerlink" title="定义实现"></a>定义实现</h3><div class="code-container" data-rel="Typescript"><figure class="iseeu highlight typescript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 语法：T[K] 或 T[number] 或 T[keyof T]</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">IndexAccess</span>&lt;T, K <span class="keyword">extends</span> keyof T&gt; = T[K];</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="使用案例-6"><a href="#使用案例-6" class="headerlink" title="使用案例"></a>使用案例</h3><div class="code-container" data-rel="Typescript"><figure class="iseeu highlight typescript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 基础索引访问</span></span><br><span class="line"><span class="keyword">interface</span> <span class="title class_">Person</span> &#123;</span><br><span class="line">  <span class="attr">name</span>: <span class="built_in">string</span>;</span><br><span class="line">  <span class="attr">age</span>: <span class="built_in">number</span>;</span><br><span class="line">  <span class="attr">address</span>: &#123;</span><br><span class="line">    <span class="attr">city</span>: <span class="built_in">string</span>;</span><br><span class="line">    <span class="attr">country</span>: <span class="built_in">string</span>;</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Name</span> = <span class="title class_">Person</span>[<span class="string">&quot;name&quot;</span>]; <span class="comment">// string</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Age</span> = <span class="title class_">Person</span>[<span class="string">&quot;age&quot;</span>]; <span class="comment">// number</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Address</span> = <span class="title class_">Person</span>[<span class="string">&quot;address&quot;</span>]; <span class="comment">// &#123; city: string; country: string &#125;</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">City</span> = <span class="title class_">Person</span>[<span class="string">&quot;address&quot;</span>][<span class="string">&quot;city&quot;</span>]; <span class="comment">// string</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 数组索引访问</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">StringArray</span> = <span class="built_in">string</span>[];</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">ArrayElement</span> = <span class="title class_">StringArray</span>[<span class="built_in">number</span>]; <span class="comment">// string</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 元组索引访问</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Tuple</span> = [<span class="built_in">string</span>, <span class="built_in">number</span>, <span class="built_in">boolean</span>];</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">First</span> = <span class="title class_">Tuple</span>[<span class="number">0</span>]; <span class="comment">// string</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Second</span> = <span class="title class_">Tuple</span>[<span class="number">1</span>]; <span class="comment">// number</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Third</span> = <span class="title class_">Tuple</span>[<span class="number">2</span>]; <span class="comment">// boolean</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 联合索引访问</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">NameOrAge</span> = <span class="title class_">Person</span>[<span class="string">&quot;name&quot;</span> | <span class="string">&quot;age&quot;</span>]; <span class="comment">// string | number</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 所有属性类型的联合</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">AllPersonValues</span> = <span class="title class_">Person</span>[keyof <span class="title class_">Person</span>]; <span class="comment">// string | number | &#123; city: string; country: string &#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 实际应用：深度访问</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">DeepGet</span>&lt;T, K <span class="keyword">extends</span> <span class="built_in">string</span>&gt; = K <span class="keyword">extends</span> <span class="string">`<span class="subst">$&#123;infer Key&#125;</span>.<span class="subst">$&#123;infer Rest&#125;</span>`</span></span><br><span class="line">  ? <span class="title class_">Key</span> <span class="keyword">extends</span> keyof T</span><br><span class="line">    ? <span class="title class_">DeepGet</span>&lt;T[<span class="title class_">Key</span>], <span class="title class_">Rest</span>&gt;</span><br><span class="line">    : <span class="built_in">never</span></span><br><span class="line">  : K <span class="keyword">extends</span> keyof T</span><br><span class="line">  ? T[K]</span><br><span class="line">  : <span class="built_in">never</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">DeepCity</span> = <span class="title class_">DeepGet</span>&lt;<span class="title class_">Person</span>, <span class="string">&quot;address.city&quot;</span>&gt;; <span class="comment">// string</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 数组元素类型提取</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">ArrayElementType</span>&lt;T&gt; = T <span class="title function_">extends</span> (infer U)[] ? U : <span class="built_in">never</span>;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">ElementType</span> = <span class="title class_">ArrayElementType</span>&lt;<span class="title class_">Person</span>[]&gt;; <span class="comment">// Person</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 函数参数类型提取</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Parameters</span>&lt;T&gt; = T <span class="title function_">extends</span> (...<span class="attr">args</span>: infer P) =&gt; <span class="built_in">any</span> ? P : <span class="built_in">never</span>;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">FunctionParams</span> = <span class="title class_">Parameters</span>&lt;<span class="function">(<span class="params"><span class="attr">a</span>: <span class="built_in">string</span>, <span class="attr">b</span>: <span class="built_in">number</span></span>) =&gt;</span> <span class="built_in">void</span>&gt;; <span class="comment">// [string, number]</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">FirstParam</span> = <span class="title class_">FunctionParams</span>[<span class="number">0</span>]; <span class="comment">// string</span></span><br></pre></td></tr></table></figure></div>
+
+<h3 id="错误场景-6"><a href="#错误场景-6" class="headerlink" title="错误场景"></a>错误场景</h3><div class="code-container" data-rel="Typescript"><figure class="iseeu highlight typescript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// ❌ 错误：索引不存在</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Wrong</span> = <span class="title class_">Person</span>[<span class="string">&quot;nonExistent&quot;</span>]; <span class="comment">// Error: Property &#x27;nonExistent&#x27; does not exist on type &#x27;Person&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// ❌ 错误：索引类型不匹配</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">AlsoWrong</span> = <span class="title class_">Person</span>[<span class="number">123</span>]; <span class="comment">// Error: 123 不是 Person 的有效索引</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// ❌ 错误：对非对象类型使用索引</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">BadIndex</span> = <span class="built_in">string</span>[<span class="string">&quot;length&quot;</span>]; <span class="comment">// 实际上这是可以的，返回 number</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// ❌ 错误：动态索引访问</span></span><br><span class="line"><span class="keyword">const</span> key = <span class="string">&quot;name&quot;</span>;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">DynamicWrong</span> = <span class="title class_">Person</span>[key]; <span class="comment">// Error: &#x27;key&#x27; 不能用作索引</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// ✅ 正确用法</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Correct</span> = <span class="title class_">Person</span>[<span class="string">&quot;name&quot;</span>];</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">CorrectUnion</span> = <span class="title class_">Person</span>[<span class="string">&quot;name&quot;</span> | <span class="string">&quot;age&quot;</span>];</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">CorrectDynamic</span>&lt;K <span class="keyword">extends</span> keyof <span class="title class_">Person</span>&gt; = <span class="title class_">Person</span>[K];</span><br></pre></td></tr></table></figure></div>
+
+<hr>
+<h2 id="8-操作符（联合类型操作符）"><a href="#8-操作符（联合类型操作符）" class="headerlink" title="8. | 操作符（联合类型操作符）"></a>8. <code>|</code> 操作符（联合类型操作符）</h2><h3 id="功能-7"><a href="#功能-7" class="headerlink" title="功能"></a>功能</h3><p>创建联合类型，表示一个值可以是多种类型中的任意一种。</p>
+<h3 id="定义实现-7"><a href="#定义实现-7" class="headerlink" title="定义实现"></a>定义实现</h3><div class="code-container" data-rel="Typescript"><figure class="iseeu highlight typescript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 语法：T | U | V</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Union</span>&lt;T, U&gt; = T | U;</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="使用案例-7"><a href="#使用案例-7" class="headerlink" title="使用案例"></a>使用案例</h3><div class="code-container" data-rel="Typescript"><figure class="iseeu highlight typescript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 基础联合类型</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">StringOrNumber</span> = <span class="built_in">string</span> | <span class="built_in">number</span>;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Status</span> = <span class="string">&quot;loading&quot;</span> | <span class="string">&quot;success&quot;</span> | <span class="string">&quot;error&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 函数参数联合类型</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">process</span>(<span class="params"><span class="attr">value</span>: <span class="built_in">string</span> | <span class="built_in">number</span></span>): <span class="built_in">string</span> &#123;</span><br><span class="line">  <span class="keyword">if</span> (<span class="keyword">typeof</span> value === <span class="string">&quot;string&quot;</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> value.<span class="title function_">toUpperCase</span>();</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> value.<span class="title function_">toString</span>();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 对象联合类型</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Circle</span> = &#123;</span><br><span class="line">  <span class="attr">kind</span>: <span class="string">&quot;circle&quot;</span>;</span><br><span class="line">  <span class="attr">radius</span>: <span class="built_in">number</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Rectangle</span> = &#123;</span><br><span class="line">  <span class="attr">kind</span>: <span class="string">&quot;rectangle&quot;</span>;</span><br><span class="line">  <span class="attr">width</span>: <span class="built_in">number</span>;</span><br><span class="line">  <span class="attr">height</span>: <span class="built_in">number</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Shape</span> = <span class="title class_">Circle</span> | <span class="title class_">Rectangle</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">getArea</span>(<span class="params"><span class="attr">shape</span>: <span class="title class_">Shape</span></span>): <span class="built_in">number</span> &#123;</span><br><span class="line">  <span class="keyword">switch</span> (shape.<span class="property">kind</span>) &#123;</span><br><span class="line">    <span class="keyword">case</span> <span class="string">&quot;circle&quot;</span>:</span><br><span class="line">      <span class="keyword">return</span> <span class="title class_">Math</span>.<span class="property">PI</span> * shape.<span class="property">radius</span> ** <span class="number">2</span>;</span><br><span class="line">    <span class="keyword">case</span> <span class="string">&quot;rectangle&quot;</span>:</span><br><span class="line">      <span class="keyword">return</span> shape.<span class="property">width</span> * shape.<span class="property">height</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 联合类型的分布式行为</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">ToArray</span>&lt;T&gt; = T <span class="keyword">extends</span> <span class="built_in">any</span> ? T[] : <span class="built_in">never</span>;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Result</span> = <span class="title class_">ToArray</span>&lt;<span class="built_in">string</span> | <span class="built_in">number</span>&gt;; <span class="comment">// string[] | number[]</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 实际应用：API 响应类型</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">ApiResponse</span>&lt;T&gt; = </span><br><span class="line">  | &#123; <span class="attr">success</span>: <span class="literal">true</span>; <span class="attr">data</span>: T &#125;</span><br><span class="line">  | &#123; <span class="attr">success</span>: <span class="literal">false</span>; <span class="attr">error</span>: <span class="built_in">string</span> &#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">UserResponse</span> = <span class="title class_">ApiResponse</span>&lt;<span class="title class_">User</span>&gt;;</span><br><span class="line"><span class="comment">// &#123; success: true; data: User &#125; | &#123; success: false; error: string &#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 联合类型工具函数</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Extract</span>&lt;T, U&gt; = T <span class="keyword">extends</span> U ? T : <span class="built_in">never</span>;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">StringFromUnion</span> = <span class="title class_">Extract</span>&lt;<span class="built_in">string</span> | <span class="built_in">number</span> | <span class="built_in">boolean</span>, <span class="built_in">string</span>&gt;; <span class="comment">// string</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Exclude</span>&lt;T, U&gt; = T <span class="keyword">extends</span> U ? <span class="built_in">never</span> : T;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">NonString</span> = <span class="title class_">Exclude</span>&lt;<span class="built_in">string</span> | <span class="built_in">number</span> | <span class="built_in">boolean</span>, <span class="built_in">string</span>&gt;; <span class="comment">// number | boolean</span></span><br></pre></td></tr></table></figure></div>
+
+<h3 id="错误场景-7"><a href="#错误场景-7" class="headerlink" title="错误场景"></a>错误场景</h3><div class="code-container" data-rel="Typescript"><figure class="iseeu highlight typescript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// ❌ 错误：访问联合类型的非共同属性</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Union</span> = &#123; <span class="attr">a</span>: <span class="built_in">string</span> &#125; | &#123; <span class="attr">b</span>: <span class="built_in">number</span> &#125;;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Wrong</span> = <span class="title class_">Union</span>[<span class="string">&quot;a&quot;</span>]; <span class="comment">// Error: Property &#x27;a&#x27; does not exist on type &#x27;&#123; b: number &#125;&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// ❌ 错误：不正确的类型守卫</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">badGuard</span>(<span class="params"><span class="attr">value</span>: <span class="built_in">string</span> | <span class="built_in">number</span></span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> value.<span class="title function_">toUpperCase</span>(); <span class="comment">// Error: Property &#x27;toUpperCase&#x27; does not exist on type &#x27;number&#x27;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ✅ 正确用法：类型守卫</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">goodGuard</span>(<span class="params"><span class="attr">value</span>: <span class="built_in">string</span> | <span class="built_in">number</span></span>): <span class="built_in">string</span> &#123;</span><br><span class="line">  <span class="keyword">if</span> (<span class="keyword">typeof</span> value === <span class="string">&quot;string&quot;</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> value.<span class="title function_">toUpperCase</span>();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> value.<span class="title function_">toString</span>();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ✅ 正确用法：访问共同属性</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">CommonUnion</span> = &#123; <span class="attr">common</span>: <span class="built_in">string</span>; <span class="attr">a</span>: <span class="built_in">number</span> &#125; | &#123; <span class="attr">common</span>: <span class="built_in">string</span>; <span class="attr">b</span>: <span class="built_in">boolean</span> &#125;;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Common</span> = <span class="title class_">CommonUnion</span>[<span class="string">&quot;common&quot;</span>]; <span class="comment">// string</span></span><br></pre></td></tr></table></figure></div>
+
+<hr>
+<h2 id="9-操作符（交叉类型操作符）"><a href="#9-操作符（交叉类型操作符）" class="headerlink" title="9. &amp; 操作符（交叉类型操作符）"></a>9. <code>&amp;</code> 操作符（交叉类型操作符）</h2><h3 id="功能-8"><a href="#功能-8" class="headerlink" title="功能"></a>功能</h3><p>创建交叉类型，将多个类型合并为一个类型，包含所有类型的属性。</p>
+<h3 id="定义实现-8"><a href="#定义实现-8" class="headerlink" title="定义实现"></a>定义实现</h3><div class="code-container" data-rel="Typescript"><figure class="iseeu highlight typescript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 语法：T &amp; U &amp; V</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Intersection</span>&lt;T, U&gt; = T &amp; U;</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="使用案例-8"><a href="#使用案例-8" class="headerlink" title="使用案例"></a>使用案例</h3><div class="code-container" data-rel="Typescript"><figure class="iseeu highlight typescript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 基础交叉类型</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Person</span> = &#123;</span><br><span class="line">  <span class="attr">name</span>: <span class="built_in">string</span>;</span><br><span class="line">  <span class="attr">age</span>: <span class="built_in">number</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Employee</span> = &#123;</span><br><span class="line">  <span class="attr">id</span>: <span class="built_in">number</span>;</span><br><span class="line">  <span class="attr">department</span>: <span class="built_in">string</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">PersonEmployee</span> = <span class="title class_">Person</span> &amp; <span class="title class_">Employee</span>;</span><br><span class="line"><span class="comment">// &#123; name: string; age: number; id: number; department: string &#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 函数类型交叉</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Logger</span> = &#123;</span><br><span class="line">  <span class="attr">log</span>: <span class="function">(<span class="params"><span class="attr">message</span>: <span class="built_in">string</span></span>) =&gt;</span> <span class="built_in">void</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Counter</span> = &#123;</span><br><span class="line">  <span class="attr">count</span>: <span class="built_in">number</span>;</span><br><span class="line">  <span class="attr">increment</span>: <span class="function">() =&gt;</span> <span class="built_in">void</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">LoggerCounter</span> = <span class="title class_">Logger</span> &amp; <span class="title class_">Counter</span>;</span><br><span class="line"><span class="keyword">const</span> <span class="attr">loggerCounter</span>: <span class="title class_">LoggerCounter</span> = &#123;</span><br><span class="line">  <span class="attr">log</span>: <span class="function">(<span class="params">message</span>) =&gt;</span> <span class="variable language_">console</span>.<span class="title function_">log</span>(message),</span><br><span class="line">  <span class="attr">count</span>: <span class="number">0</span>,</span><br><span class="line">  <span class="title function_">increment</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">count</span>++;</span><br><span class="line">    <span class="variable language_">this</span>.<span class="title function_">log</span>(<span class="string">`Count is now <span class="subst">$&#123;<span class="variable language_">this</span>.count&#125;</span>`</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Mixin 模式</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Timestamped</span> = &#123;</span><br><span class="line">  <span class="attr">timestamp</span>: <span class="title class_">Date</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Versioned</span> = &#123;</span><br><span class="line">  <span class="attr">version</span>: <span class="built_in">number</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Document</span> = &#123;</span><br><span class="line">  <span class="attr">title</span>: <span class="built_in">string</span>;</span><br><span class="line">  <span class="attr">content</span>: <span class="built_in">string</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">VersionedDocument</span> = <span class="title class_">Document</span> &amp; <span class="title class_">Timestamped</span> &amp; <span class="title class_">Versioned</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 实际应用：配置对象合并</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">BaseConfig</span> = &#123;</span><br><span class="line">  <span class="attr">apiUrl</span>: <span class="built_in">string</span>;</span><br><span class="line">  <span class="attr">timeout</span>: <span class="built_in">number</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">DevConfig</span> = &#123;</span><br><span class="line">  <span class="attr">debug</span>: <span class="built_in">boolean</span>;</span><br><span class="line">  <span class="attr">mockData</span>: <span class="built_in">boolean</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">ProductionConfig</span> = &#123;</span><br><span class="line">  <span class="attr">analytics</span>: <span class="built_in">boolean</span>;</span><br><span class="line">  <span class="attr">errorReporting</span>: <span class="built_in">boolean</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">AppConfig</span> = <span class="title class_">BaseConfig</span> &amp; (<span class="title class_">DevConfig</span> | <span class="title class_">ProductionConfig</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 条件交叉类型</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">AddTimestamp</span>&lt;T&gt; = T &amp; &#123; <span class="attr">timestamp</span>: <span class="title class_">Date</span> &#125;;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">TimestampedUser</span> = <span class="title class_">AddTimestamp</span>&lt;<span class="title class_">Person</span>&gt;;</span><br><span class="line"><span class="comment">// &#123; name: string; age: number; timestamp: Date &#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 工具类型与交叉类型</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Override</span>&lt;T, U&gt; = <span class="title class_">Omit</span>&lt;T, keyof U&gt; &amp; U;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">UpdatedPerson</span> = <span class="title class_">Override</span>&lt;<span class="title class_">Person</span>, &#123; <span class="attr">age</span>: <span class="built_in">string</span> &#125;&gt;; <span class="comment">// &#123; name: string; age: string &#125;</span></span><br></pre></td></tr></table></figure></div>
+
+<h3 id="错误场景-8"><a href="#错误场景-8" class="headerlink" title="错误场景"></a>错误场景</h3><div class="code-container" data-rel="Typescript"><figure class="iseeu highlight typescript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// ❌ 错误：冲突的属性类型</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Conflict</span> = &#123; <span class="attr">prop</span>: <span class="built_in">string</span> &#125; &amp; &#123; <span class="attr">prop</span>: <span class="built_in">number</span> &#125;;</span><br><span class="line"><span class="comment">// 这会创建一个 prop: string &amp; number 的类型，实际上是 never</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// ❌ 错误：不兼容的函数签名</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">FunctionConflict</span> = (<span class="function">(<span class="params"><span class="attr">x</span>: <span class="built_in">string</span></span>) =&gt;</span> <span class="built_in">void</span>) &amp; (<span class="function">(<span class="params"><span class="attr">x</span>: <span class="built_in">number</span></span>) =&gt;</span> <span class="built_in">void</span>);</span><br><span class="line"><span class="comment">// 这会创建一个不可调用的函数类型</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// ❌ 错误：原始类型交叉</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">PrimitiveIntersection</span> = <span class="built_in">string</span> &amp; <span class="built_in">number</span>; <span class="comment">// never</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// ✅ 正确用法：兼容的属性类型</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">CompatibleIntersection</span> = &#123; <span class="attr">a</span>: <span class="built_in">string</span> &#125; &amp; &#123; <span class="attr">b</span>: <span class="built_in">number</span> &#125;; <span class="comment">// &#123; a: string; b: number &#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// ✅ 正确用法：函数重载</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">OverloadedFunction</span> = &#123;</span><br><span class="line">  (<span class="attr">x</span>: <span class="built_in">string</span>): <span class="built_in">string</span>;</span><br><span class="line">  (<span class="attr">x</span>: <span class="built_in">number</span>): <span class="built_in">number</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></div>
+
+<hr>
+<h2 id="10-is-操作符（类型谓词操作符）"><a href="#10-is-操作符（类型谓词操作符）" class="headerlink" title="10. is 操作符（类型谓词操作符）"></a>10. <code>is</code> 操作符（类型谓词操作符）</h2><h3 id="功能-9"><a href="#功能-9" class="headerlink" title="功能"></a>功能</h3><p>创建类型谓词函数，用于类型守卫，帮助 TypeScript 进行类型收窄。</p>
+<h3 id="定义实现-9"><a href="#定义实现-9" class="headerlink" title="定义实现"></a>定义实现</h3><div class="code-container" data-rel="Typescript"><figure class="iseeu highlight typescript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 语法：parameterName is Type</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">isType</span>(<span class="params"><span class="attr">value</span>: <span class="built_in">unknown</span></span>): value is <span class="title class_">SomeType</span> &#123;</span><br><span class="line">  <span class="comment">// 类型检查逻辑</span></span><br><span class="line">  <span class="keyword">return</span> <span class="comment">/* boolean expression */</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="使用案例-9"><a href="#使用案例-9" class="headerlink" title="使用案例"></a>使用案例</h3><div class="code-container" data-rel="Typescript"><figure class="iseeu highlight typescript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 基础类型谓词</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">isString</span>(<span class="params"><span class="attr">value</span>: <span class="built_in">unknown</span></span>): value is <span class="built_in">string</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">typeof</span> value === <span class="string">&quot;string&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">isNumber</span>(<span class="params"><span class="attr">value</span>: <span class="built_in">unknown</span></span>): value is <span class="built_in">number</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">typeof</span> value === <span class="string">&quot;number&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 使用类型谓词</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">processValue</span>(<span class="params"><span class="attr">value</span>: <span class="built_in">unknown</span></span>): <span class="built_in">string</span> &#123;</span><br><span class="line">  <span class="keyword">if</span> (<span class="title function_">isString</span>(value)) &#123;</span><br><span class="line">    <span class="keyword">return</span> value.<span class="title function_">toUpperCase</span>(); <span class="comment">// TypeScript 知道这里 value 是 string</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (<span class="title function_">isNumber</span>(value)) &#123;</span><br><span class="line">    <span class="keyword">return</span> value.<span class="title function_">toString</span>(); <span class="comment">// TypeScript 知道这里 value 是 number</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="string">&quot;unknown&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 复杂对象类型谓词</span></span><br><span class="line"><span class="keyword">interface</span> <span class="title class_">User</span> &#123;</span><br><span class="line">  <span class="attr">name</span>: <span class="built_in">string</span>;</span><br><span class="line">  <span class="attr">age</span>: <span class="built_in">number</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">isUser</span>(<span class="params"><span class="attr">value</span>: <span class="built_in">unknown</span></span>): value is <span class="title class_">User</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> (</span><br><span class="line">    <span class="keyword">typeof</span> value === <span class="string">&quot;object&quot;</span> &amp;&amp;</span><br><span class="line">    value !== <span class="literal">null</span> &amp;&amp;</span><br><span class="line">    <span class="string">&quot;name&quot;</span> <span class="keyword">in</span> value &amp;&amp;</span><br><span class="line">    <span class="string">&quot;age&quot;</span> <span class="keyword">in</span> value &amp;&amp;</span><br><span class="line">    <span class="title function_">typeof</span> (value <span class="keyword">as</span> <span class="built_in">any</span>).<span class="property">name</span> === <span class="string">&quot;string&quot;</span> &amp;&amp;</span><br><span class="line">    <span class="title function_">typeof</span> (value <span class="keyword">as</span> <span class="built_in">any</span>).<span class="property">age</span> === <span class="string">&quot;number&quot;</span></span><br><span class="line">  );</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 数组类型谓词</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">isStringArray</span>(<span class="params"><span class="attr">value</span>: <span class="built_in">unknown</span></span>): value is <span class="built_in">string</span>[] &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="title class_">Array</span>.<span class="title function_">isArray</span>(value) &amp;&amp; value.<span class="title function_">every</span>(<span class="function"><span class="params">item</span> =&gt;</span> <span class="keyword">typeof</span> item === <span class="string">&quot;string&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 实际应用：API 数据验证</span></span><br><span class="line"><span class="keyword">interface</span> <span class="title class_">ApiUser</span> &#123;</span><br><span class="line">  <span class="attr">id</span>: <span class="built_in">number</span>;</span><br><span class="line">  <span class="attr">name</span>: <span class="built_in">string</span>;</span><br><span class="line">  <span class="attr">email</span>: <span class="built_in">string</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">isApiUser</span>(<span class="params"><span class="attr">data</span>: <span class="built_in">unknown</span></span>): data is <span class="title class_">ApiUser</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> (</span><br><span class="line">    <span class="keyword">typeof</span> data === <span class="string">&quot;object&quot;</span> &amp;&amp;</span><br><span class="line">    data !== <span class="literal">null</span> &amp;&amp;</span><br><span class="line">    <span class="string">&quot;id&quot;</span> <span class="keyword">in</span> data &amp;&amp;</span><br><span class="line">    <span class="string">&quot;name&quot;</span> <span class="keyword">in</span> data &amp;&amp;</span><br><span class="line">    <span class="string">&quot;email&quot;</span> <span class="keyword">in</span> data &amp;&amp;</span><br><span class="line">    <span class="title function_">typeof</span> (data <span class="keyword">as</span> <span class="built_in">any</span>).<span class="property">id</span> === <span class="string">&quot;number&quot;</span> &amp;&amp;</span><br><span class="line">    <span class="title function_">typeof</span> (data <span class="keyword">as</span> <span class="built_in">any</span>).<span class="property">name</span> === <span class="string">&quot;string&quot;</span> &amp;&amp;</span><br><span class="line">    <span class="title function_">typeof</span> (data <span class="keyword">as</span> <span class="built_in">any</span>).<span class="property">email</span> === <span class="string">&quot;string&quot;</span></span><br><span class="line">  );</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">function</span> <span class="title function_">fetchUser</span>(<span class="params"><span class="attr">id</span>: <span class="built_in">number</span></span>): <span class="title class_">Promise</span>&lt;<span class="title class_">ApiUser</span>&gt; &#123;</span><br><span class="line">  <span class="keyword">const</span> response = <span class="keyword">await</span> <span class="title function_">fetch</span>(<span class="string">`/api/users/<span class="subst">$&#123;id&#125;</span>`</span>);</span><br><span class="line">  <span class="keyword">const</span> data = <span class="keyword">await</span> response.<span class="title function_">json</span>();</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">if</span> (<span class="title function_">isApiUser</span>(data)) &#123;</span><br><span class="line">    <span class="keyword">return</span> data; <span class="comment">// TypeScript 知道这是 ApiUser</span></span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">Error</span>(<span class="string">&quot;Invalid user data&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 联合类型分辨</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Animal</span> = </span><br><span class="line">  | &#123; <span class="attr">type</span>: <span class="string">&quot;cat&quot;</span>; <span class="attr">meow</span>: <span class="function">() =&gt;</span> <span class="built_in">void</span> &#125;</span><br><span class="line">  | &#123; <span class="attr">type</span>: <span class="string">&quot;dog&quot;</span>; <span class="attr">bark</span>: <span class="function">() =&gt;</span> <span class="built_in">void</span> &#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">isCat</span>(<span class="params"><span class="attr">animal</span>: <span class="title class_">Animal</span></span>): animal is &#123; <span class="attr">type</span>: <span class="string">&quot;cat&quot;</span>; <span class="attr">meow</span>: <span class="function">() =&gt;</span> <span class="built_in">void</span> &#125; &#123;</span><br><span class="line">  <span class="keyword">return</span> animal.<span class="property">type</span> === <span class="string">&quot;cat&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">handleAnimal</span>(<span class="params"><span class="attr">animal</span>: <span class="title class_">Animal</span></span>) &#123;</span><br><span class="line">  <span class="keyword">if</span> (<span class="title function_">isCat</span>(animal)) &#123;</span><br><span class="line">    animal.<span class="title function_">meow</span>(); <span class="comment">// TypeScript 知道这是 cat</span></span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    animal.<span class="title function_">bark</span>(); <span class="comment">// TypeScript 知道这是 dog</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="错误场景-9"><a href="#错误场景-9" class="headerlink" title="错误场景"></a>错误场景</h3><div class="code-container" data-rel="Typescript"><figure class="iseeu highlight typescript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// ❌ 错误：类型谓词与实际逻辑不匹配</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">badIsString</span>(<span class="params"><span class="attr">value</span>: <span class="built_in">unknown</span></span>): value is <span class="built_in">string</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">typeof</span> value === <span class="string">&quot;number&quot;</span>; <span class="comment">// 逻辑错误，但编译器不会报错</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ❌ 错误：类型谓词参数错误</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">wrongParameter</span>(<span class="params"><span class="attr">value</span>: <span class="built_in">unknown</span></span>): otherValue is <span class="built_in">string</span> &#123; <span class="comment">// Error: &#x27;otherValue&#x27; 未定义</span></span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">typeof</span> value === <span class="string">&quot;string&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ❌ 错误：类型谓词返回类型错误</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">badReturnType</span>(<span class="params"><span class="attr">value</span>: <span class="built_in">unknown</span></span>):</span><br></pre></td></tr></table></figure></div>
+
+		</div>
+
+		
+		<div class="post-copyright-info w-full my-8 px-2 sm:px-6 md:px-8">
+			<div class="article-copyright-info-container">
+    <ul>
+        <li><strong>标题:</strong> TypeScript 类型操作符详解</li>
+        <li><strong>作者:</strong> Simon</li>
+        <li><strong>创建于
+                :</strong> 2025-09-11 11:48:11</li>
+        
+            <li>
+                <strong>更新于
+                    :</strong> 2025-09-11 11:49:48
+            </li>
+        
+        <li>
+            <strong>链接:</strong> https://www.simonicle.cn/2025/09/11/TypeScript 类型操作符详解/
+        </li>
+        <li>
+            <strong>
+                版权声明:
+            </strong>
+            
+
+            
+                本文章采用 <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a> 进行许可。
+            
+        </li>
+    </ul>
+</div>
+
+		</div>
+		
+
+		
+		<ul class="post-tags-box text-lg mt-1.5 flex-wrap justify-center flex md:hidden">
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/TypeScript/">#TypeScript</a>&nbsp;
+			</li>
+			
+		</ul>
+		
+
+		
+  <div class="recommended-article px-2 sm:px-6 md:px-8">
+   <div class="recommended-desktop">
+    <div class="recommended-article-header text-xl md:text-3xl font-bold mt-10">
+     <i aria-hidden="true"></i><span>推荐阅读</span>
+    </div>
+    <div class="recommended-article-group"><a class="recommended-article-item" href="/2025/06/12/%E3%80%90%E5%BB%BA%E7%AB%99%E6%97%A5%E5%BF%97%E3%80%91Simon%E5%B7%B2%E7%9D%80%E9%99%86/" title="【建站日志】Simon成功搬家" rel="bookmark">
+  <img src="/images/wallhaven-wqery6-light.webp" alt="【建站日志】Simon成功搬家" class="!max-w-none">
+  <span class="title">【建站日志】Simon成功搬家</span>
+</a><a class="recommended-article-item" href="/2025/07/22/%E3%80%90%E7%A7%8B%E6%8B%9B%E5%A4%87%E6%88%98%E3%80%91%E9%9D%A2%E8%AF%95%E6%89%8B%E6%92%95%E5%A4%A7%E9%9B%86%E5%90%88/" title="【秋招准备】面试手撕大集合" rel="bookmark">
+  <img src="/medias/shuishui.jpg" alt="【秋招准备】面试手撕大集合" class="!max-w-none">
+  <span class="title">【秋招准备】面试手撕大集合</span>
+</a><a class="recommended-article-item" href="/2025/08/05/%E3%80%90%E7%A7%8B%E6%8B%9B%E5%A4%87%E6%88%98%E3%80%91JavaScript%20%E9%9B%86%E5%90%88%E7%B1%BB%E5%9E%8B%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/" title="【秋招备战】JavaScript 集合类型深度解析" rel="bookmark">
+  <img src="/medias/shuishui.jpg" alt="【秋招备战】JavaScript 集合类型深度解析" class="!max-w-none">
+  <span class="title">【秋招备战】JavaScript 集合类型深度解析</span>
+</a></div>
+   </div>
+   <div class="recommended-mobile">
+   <div class="recommended-article-header text-xl md:text-3xl font-bold mt-10">
+     <i aria-hidden="true"></i><span>推荐阅读</span>
+   </div>
+   <div class="recommended-article-group"><a class="recommended-article-item" href="/2025/06/12/%E3%80%90%E5%BB%BA%E7%AB%99%E6%97%A5%E5%BF%97%E3%80%91Simon%E5%B7%B2%E7%9D%80%E9%99%86/" title="【建站日志】Simon成功搬家" rel="bookmark">
+  <img src="/images/wallhaven-wqery6-light.webp" alt="【建站日志】Simon成功搬家" class="!max-w-none">
+  <span class="title">【建站日志】Simon成功搬家</span>
+</a><a class="recommended-article-item" href="/2025/07/22/%E3%80%90%E7%A7%8B%E6%8B%9B%E5%A4%87%E6%88%98%E3%80%91%E9%9D%A2%E8%AF%95%E6%89%8B%E6%92%95%E5%A4%A7%E9%9B%86%E5%90%88/" title="【秋招准备】面试手撕大集合" rel="bookmark">
+  <img src="/medias/shuishui.jpg" alt="【秋招准备】面试手撕大集合" class="!max-w-none">
+  <span class="title">【秋招准备】面试手撕大集合</span>
+</a></div>
+   </div>
+  </div>
+
+		
+		<div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
+			
+			<div class="article-prev border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="prev" rel="prev" href="/2025/09/11/AI%E9%A9%B1%E5%8A%A8%E7%9A%84%E6%B8%90%E8%BF%9B%E5%BC%8F%E5%AD%A6%E4%B9%A0%E5%B7%A5%E4%BD%9C%E6%B5%81/">
+					<span class="left arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-left"></i>
+					</span>
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">AI驱动的渐进式学习工作流</span>
+						<span class="post-nav-item">上一篇</span>
+					</span>
+				</a>
+			</div>
+			
+			
+			<div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="next" rel="next" href="/2025/09/11/Docker%20%E6%8C%87%E4%BB%A4%E9%9B%86%E5%90%88%E6%8C%87%E5%8D%97/">
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">Docker 指令集合指南</span>
+						<span class="post-nav-item">下一篇</span>
+					</span>
+					<span class="right arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-right"></i>
+					</span>
+				</a>
+			</div>
+			
+		</div>
+		
+
+
+		
+		<div class="comment-container px-2 sm:px-6 md:px-8 pb-8">
+			<div class="comments-container mt-10 w-full ">
+    <div id="comment-anchor" class="w-full h-2.5"></div>
+    <div class="comment-area-title w-full my-1.5 md:my-2.5 text-xl md:text-3xl font-bold">
+        评论
+    </div>
+    
+
+        
+            
+    <div id="waline"></div>
+    <script type="module" data-swup-reload-script>
+      import { init } from '/js/libs/waline.mjs';
+
+      function loadWaline() {
+        init({
+          el: '#waline',
+          serverURL: 'https://www.simonicle.cn',
+          dark: 'body[class~="dark-mode"]',
+          reaction: false,
+          requiredMeta: ['nick', 'mail'],
+          emoji: [],
+                    lang: 'zh-CN',
+        });
+      }
+
+      if (typeof swup !== 'undefined') {
+        loadWaline();
+      } else {
+        window.addEventListener('DOMContentLoaded', loadWaline);
+      }
+    </script>
+
+
+
+        
+    
+</div>
+
+		</div>
+		
+	</div>
+
+	
+	<div class="toc-content-container">
+		<div class="post-toc-wrap">
+	<div class="post-toc">
+		<div class="toc-title">目录</div>
+		<div class="page-title">TypeScript 类型操作符详解</div>
+		<ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-typeof-%E6%93%8D%E4%BD%9C%E7%AC%A6%EF%BC%88%E7%B1%BB%E5%9E%8B%E6%9F%A5%E8%AF%A2%E6%93%8D%E4%BD%9C%E7%AC%A6%EF%BC%89"><span class="nav-text">1. typeof 操作符（类型查询操作符）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%9F%E8%83%BD"><span class="nav-text">功能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E5%AE%9E%E7%8E%B0"><span class="nav-text">定义实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%A1%88%E4%BE%8B"><span class="nav-text">使用案例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%94%99%E8%AF%AF%E5%9C%BA%E6%99%AF"><span class="nav-text">错误场景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-keyof-%E6%93%8D%E4%BD%9C%E7%AC%A6%EF%BC%88%E9%94%AE%E6%9F%A5%E8%AF%A2%E6%93%8D%E4%BD%9C%E7%AC%A6%EF%BC%89"><span class="nav-text">2. keyof 操作符（键查询操作符）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%9F%E8%83%BD-1"><span class="nav-text">功能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E5%AE%9E%E7%8E%B0-1"><span class="nav-text">定义实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%A1%88%E4%BE%8B-1"><span class="nav-text">使用案例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%94%99%E8%AF%AF%E5%9C%BA%E6%99%AF-1"><span class="nav-text">错误场景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-extends-%E6%93%8D%E4%BD%9C%E7%AC%A6%EF%BC%88%E6%9D%A1%E4%BB%B6%E7%B1%BB%E5%9E%8B%E6%93%8D%E4%BD%9C%E7%AC%A6%EF%BC%89"><span class="nav-text">3. extends 操作符（条件类型操作符）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%9F%E8%83%BD-2"><span class="nav-text">功能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E5%AE%9E%E7%8E%B0-2"><span class="nav-text">定义实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%A1%88%E4%BE%8B-2"><span class="nav-text">使用案例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%94%99%E8%AF%AF%E5%9C%BA%E6%99%AF-2"><span class="nav-text">错误场景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-infer-%E6%93%8D%E4%BD%9C%E7%AC%A6%EF%BC%88%E7%B1%BB%E5%9E%8B%E6%8E%A8%E6%96%AD%E6%93%8D%E4%BD%9C%E7%AC%A6%EF%BC%89"><span class="nav-text">4. infer 操作符（类型推断操作符）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%9F%E8%83%BD-3"><span class="nav-text">功能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E5%AE%9E%E7%8E%B0-3"><span class="nav-text">定义实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%A1%88%E4%BE%8B-3"><span class="nav-text">使用案例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%94%99%E8%AF%AF%E5%9C%BA%E6%99%AF-3"><span class="nav-text">错误场景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-in-%E6%93%8D%E4%BD%9C%E7%AC%A6%EF%BC%88%E6%98%A0%E5%B0%84%E7%B1%BB%E5%9E%8B%E6%93%8D%E4%BD%9C%E7%AC%A6%EF%BC%89"><span class="nav-text">5. in 操作符（映射类型操作符）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%9F%E8%83%BD-4"><span class="nav-text">功能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E5%AE%9E%E7%8E%B0-4"><span class="nav-text">定义实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%A1%88%E4%BE%8B-4"><span class="nav-text">使用案例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%94%99%E8%AF%AF%E5%9C%BA%E6%99%AF-4"><span class="nav-text">错误场景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-as-%E6%93%8D%E4%BD%9C%E7%AC%A6%EF%BC%88%E9%94%AE%E9%87%8D%E6%98%A0%E5%B0%84%E6%93%8D%E4%BD%9C%E7%AC%A6%EF%BC%89"><span class="nav-text">6. as 操作符（键重映射操作符）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%9F%E8%83%BD-5"><span class="nav-text">功能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E5%AE%9E%E7%8E%B0-5"><span class="nav-text">定义实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%A1%88%E4%BE%8B-5"><span class="nav-text">使用案例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%94%99%E8%AF%AF%E5%9C%BA%E6%99%AF-5"><span class="nav-text">错误场景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-%E6%93%8D%E4%BD%9C%E7%AC%A6%EF%BC%88%E7%B4%A2%E5%BC%95%E8%AE%BF%E9%97%AE%E6%93%8D%E4%BD%9C%E7%AC%A6%EF%BC%89"><span class="nav-text">7. [] 操作符（索引访问操作符）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%9F%E8%83%BD-6"><span class="nav-text">功能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E5%AE%9E%E7%8E%B0-6"><span class="nav-text">定义实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%A1%88%E4%BE%8B-6"><span class="nav-text">使用案例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%94%99%E8%AF%AF%E5%9C%BA%E6%99%AF-6"><span class="nav-text">错误场景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-%E6%93%8D%E4%BD%9C%E7%AC%A6%EF%BC%88%E8%81%94%E5%90%88%E7%B1%BB%E5%9E%8B%E6%93%8D%E4%BD%9C%E7%AC%A6%EF%BC%89"><span class="nav-text">8. | 操作符（联合类型操作符）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%9F%E8%83%BD-7"><span class="nav-text">功能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E5%AE%9E%E7%8E%B0-7"><span class="nav-text">定义实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%A1%88%E4%BE%8B-7"><span class="nav-text">使用案例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%94%99%E8%AF%AF%E5%9C%BA%E6%99%AF-7"><span class="nav-text">错误场景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-%E6%93%8D%E4%BD%9C%E7%AC%A6%EF%BC%88%E4%BA%A4%E5%8F%89%E7%B1%BB%E5%9E%8B%E6%93%8D%E4%BD%9C%E7%AC%A6%EF%BC%89"><span class="nav-text">9. &amp; 操作符（交叉类型操作符）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%9F%E8%83%BD-8"><span class="nav-text">功能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E5%AE%9E%E7%8E%B0-8"><span class="nav-text">定义实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%A1%88%E4%BE%8B-8"><span class="nav-text">使用案例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%94%99%E8%AF%AF%E5%9C%BA%E6%99%AF-8"><span class="nav-text">错误场景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-is-%E6%93%8D%E4%BD%9C%E7%AC%A6%EF%BC%88%E7%B1%BB%E5%9E%8B%E8%B0%93%E8%AF%8D%E6%93%8D%E4%BD%9C%E7%AC%A6%EF%BC%89"><span class="nav-text">10. is 操作符（类型谓词操作符）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%9F%E8%83%BD-9"><span class="nav-text">功能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E5%AE%9E%E7%8E%B0-9"><span class="nav-text">定义实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%A1%88%E4%BE%8B-9"><span class="nav-text">使用案例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%94%99%E8%AF%AF%E5%9C%BA%E6%99%AF-9"><span class="nav-text">错误场景</span></a></li></ol></li></ol>
+
+	</div>
+</div>
+	</div>
+	
+</div>
+			</div>
+
+			
+		</div>
+
+		<div class="main-content-footer">
+			<footer class="footer mt-5 py-5 h-auto text-base text-third-text-color relative border-t-2 border-t-border-color">
+    <div class="info-container py-3 text-center">
+        
+            <div class="customize-info my-1">为什么是这样的呢。</div>
+        
+        <div class="text-center">
+            &copy;
+            
+              <span>2025</span>
+              -
+            
+            2025&nbsp;&nbsp;<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #f54545"></i>&nbsp;&nbsp;<a href="/">Simon</a>
+            
+                
+                <p class="post-count space-x-0.5">
+                    <span>
+                        共撰写了 14 篇文章
+                    </span>
+                    
+                </p>
+            
+        </div>
+        
+            <script data-swup-reload-script src="https://cn.vercount.one/js"></script>
+            <div class="relative text-center lg:absolute lg:right-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-right">
+                
+                    <span id="busuanzi_container_site_uv" class="lg:!block">
+                        <span class="text-sm">访问人数</span>
+                        <span id="busuanzi_value_site_uv"></span>
+                    </span>
+                
+                
+                    <span id="busuanzi_container_site_pv" class="lg:!block">
+                        <span class="text-sm">总访问量</span>
+                        <span id="busuanzi_value_site_pv"></span>
+                    </span>
+                
+            </div>
+        
+        <div class="relative text-center lg:absolute lg:left-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-left">
+            <span class="lg:block text-sm">由 <?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg class="relative top-[2px] inline-block align-baseline" version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1rem" height="1rem" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><path fill="#0E83CD" d="M256.4,25.8l-200,115.5L56,371.5l199.6,114.7l200-115.5l0.4-230.2L256.4,25.8z M349,354.6l-18.4,10.7l-18.6-11V275H200v79.6l-18.4,10.7l-18.6-11v-197l18.5-10.6l18.5,10.8V237h112v-79.6l18.5-10.6l18.5,10.8V354.6z"/></svg><a target="_blank" class="text-base" href="https://hexo.io">Hexo</a> 驱动</span>
+            <span class="text-sm lg:block">主题&nbsp;<a class="text-base" target="_blank" href="https://github.com/EvanNotFound/hexo-theme-redefine">Redefine v2.8.5</a></span>
+        </div>
+        
+        
+            <div>
+                博客已运行 <span class="odometer" id="runtime_days" ></span> 天 <span class="odometer" id="runtime_hours"></span> 小时 <span class="odometer" id="runtime_minutes"></span> 分钟 <span class="odometer" id="runtime_seconds"></span> 秒
+            </div>
+        
+        
+            <script data-swup-reload-script>
+                try {
+                    function odometer_init() {
+                    const elements = document.querySelectorAll('.odometer');
+                    elements.forEach(el => {
+                        new Odometer({
+                            el,
+                            format: '( ddd).dd',
+                            duration: 200
+                        });
+                    });
+                    }
+                    odometer_init();
+                } catch (error) {}
+            </script>
+        
+        
+        
+    </div>  
+</footer>
+		</div>
+	</div>
+
+	
+	<div class="post-tools">
+		<div class="post-tools-container">
+	<ul class="article-tools-list">
+		<!-- TOC aside toggle -->
+		
+		<li class="right-bottom-tools page-aside-toggle">
+			<i class="fa-regular fa-outdent"></i>
+		</li>
+		
+
+		<!-- go comment -->
+		
+		<li class="go-comment">
+			<i class="fa-regular fa-comments"></i>
+		</li>
+		
+	</ul>
+</div>
+	</div>
+	
+
+	<div class="right-side-tools-container">
+		<div class="side-tools-container">
+	<ul class="hidden-tools-list">
+		<li class="right-bottom-tools tool-font-adjust-plus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-plus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-font-adjust-minus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-minus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-dark-light-toggle flex justify-center items-center">
+			<i class="fa-regular fa-moon"></i>
+		</li>
+
+		<!-- rss -->
+		
+
+		
+
+		<li class="right-bottom-tools tool-scroll-to-bottom flex justify-center items-center">
+			<i class="fa-regular fa-arrow-down"></i>
+		</li>
+	</ul>
+
+	<ul class="visible-tools-list">
+		<li class="right-bottom-tools toggle-tools-list flex justify-center items-center">
+			<i class="fa-regular fa-cog fa-spin"></i>
+		</li>
+		
+		<li class="right-bottom-tools tool-scroll-to-top flex justify-center items-center">
+			<i class="arrow-up fas fa-arrow-up"></i>
+			<span class="percent"></span>
+		</li>
+		
+		
+	</ul>
+</div>
+	</div>
+
+	<div class="image-viewer-container">
+	<img src="">
+</div>
+
+	
+	<div class="search-pop-overlay">
+	<div class="popup search-popup">
+		<div class="search-header">
+			<span class="search-input-field-pre">
+				<i class="fa-solid fa-keyboard"></i>
+			</span>
+			<div class="search-input-container">
+				<input autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="站内搜索您需要的内容..." spellcheck="false" type="search" class="search-input">
+			</div>
+			<span class="popup-btn-close">
+				<i class="fa-solid fa-times"></i>
+			</span>
+		</div>
+		<div id="search-result">
+			<div id="no-result">
+				<i class="fa-solid fa-spinner fa-spin-pulse fa-5x fa-fw"></i>
+			</div>
+		</div>
+	</div>
+</div>
+	
+
+</main>
+
+
+<script  src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/libs/Swup.min.js" ></script><script  src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/libs/SwupSlideTheme.min.js" ></script><script  src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/libs/SwupScriptsPlugin.min.js" ></script><script  src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/libs/SwupProgressPlugin.min.js" ></script><script  src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/libs/SwupScrollPlugin.min.js" ></script><script  src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/libs/SwupPreloadPlugin.min.js" ></script>
+<script>
+    const swup = new Swup({
+        plugins: [
+            new SwupScriptsPlugin({
+                optin: true,
+            }),
+            new SwupProgressPlugin(),
+            new SwupScrollPlugin({
+                offset: 80,
+            }),
+            new SwupSlideTheme({
+                mainElement: ".main-content-body",
+            }),
+            new SwupPreloadPlugin(),
+        ],
+        containers: ["#swup"],
+    });
+</script>
+
+
+
+
+	<script type="module" src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/tools/imageViewer.js" ></script><script type="module" src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/utils.js" ></script><script type="module" src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/main.js" ></script><script type="module" src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/layouts/navbarShrink.js" ></script><script type="module" src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/tools/scrollTopBottom.js" ></script><script type="module" src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/tools/lightDarkSwitch.js" ></script><script type="module" src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/layouts/categoryList.js" ></script>
+
+
+    <script type="module" src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/tools/localSearch.js" ></script>
+
+
+
+    <script type="module" src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/tools/codeBlock.js" ></script>
+
+
+
+    <script type="module" src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/layouts/lazyload.js" ></script>
+
+
+
+    <script  src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/tools/runtime.js" ></script>
+    <script  src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/libs/odometer.min.js" ></script>
+    <link rel="stylesheet" href="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/assets/odometer-theme-minimal.css">
+
+
+
+  <script  src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/libs/Typed.min.js" ></script>
+  <script type="module" src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/plugins/typed.js" ></script>
+
+
+
+    
+        <script  src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/libs/mermaid.min.js" ></script>
+    
+    <script  src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/plugins/mermaid.js" ></script>
+
+
+
+
+
+
+
+
+    <script type="module" src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/tools/tocToggle.js" data-swup-reload-script></script><script type="module" src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/layouts/toc.js" data-swup-reload-script></script><script type="module" src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/plugins/tabs.js" data-swup-reload-script></script>
+
+
+<script  src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/libs/moment-with-locales.min.js" data-swup-reload-script></script>
+<script type="module" src="https://evan.beee.top/projects/hexo-theme-redefine@2.8.5/source/js/build/layouts/essays.js" data-swup-reload-script></script>
+
+
+
+
+	
+</body>
+
+</html>
